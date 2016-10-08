@@ -1,5 +1,5 @@
 /*
- * GreedyHeu.cpp
+ * CPSolver.cpp
  *
  *  Created on: 05.10.2016
  *      Author: Christian
