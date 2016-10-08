@@ -20,7 +20,7 @@ using namespace std;
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/data4.txt");
+    fstream fs("instances/data8.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -56,13 +56,13 @@ int main()
     bestSolution = solution;
     bestCost = Algorithm::eval(bestSolution, distances);
 
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < 1200; i++)
     {
 
         //Destroy solution
         int teams = solver.getNumTeams();
         int rounds = solver.getNumRounds();
-        for (int j = 0; j < 8; j++)
+        for (int j = 0; j < 20; j++)
         {
             int t = std::rand() % teams;
             int r = std::rand() % rounds;
