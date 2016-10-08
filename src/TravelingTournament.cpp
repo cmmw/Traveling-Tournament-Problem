@@ -33,23 +33,16 @@ int main()
         {
             int t;
             ss >> t;
-            if (ss.eof())
+            if (ss.fail())
                 break;
             row.push_back(t);
         }
         if (!row.empty())
             distances.push_back(row);
     }
-
-//    std::vector<std::vector<int>> solution;
-//    int teams = distances.size();
-//    int rounds = 2 * distances.size() - 2;
-//    solution.resize(teams);
-//    for (int t = 0; t < teams; t++)
-//    {
-//        solution[t].resize(rounds);
-//    }
-//    CPSolver solver(solution, distances);
+    std::cout << "Distances: " << std::endl;
+    CPSolver::printMatrix(distances);
+    std::cout << "-----------" << std::endl;
 
     CPSolver solver(distances);
     if (!solver.solve())
