@@ -15,12 +15,15 @@
 #include <limits>
 #include <cstdlib>
 #include <ctime>
+#include <chrono>
 using namespace std;
+
+void test(const std::vector<std::vector<int>>& distances);
 
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/data8.txt");
+    fstream fs("instances/nfl18.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -47,6 +50,9 @@ int main()
     std::cout << "Distances: " << std::endl;
     Algorithm::printMatrix(distances);
     std::cout << "-----------" << std::endl;
+
+    test(distances);
+    return 0;
 
     CPSolver solver(distances);
     std::vector<std::vector<int>> solution;
@@ -95,4 +101,17 @@ int main()
     std::cout << Algorithm::eval(bestSolution, distances) << std::endl;
     Algorithm::printMatrix(bestSolution);
     return 0;
+}
+
+void test(const std::vector<std::vector<int>>& distances)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+    CPSolver solver(distances);
+    std::vector<std::vector<int>> solution;
+    solver.solve(solution, false);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    Algorithm::printMatrix(solution);
+    std::cout << "Total distance: " << Algorithm::eval(solution, distances) << std::endl;
+    std::cout << "Took: " << duration << "ms" << std::endl;
 }
