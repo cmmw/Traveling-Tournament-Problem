@@ -11,15 +11,18 @@
 #include <iostream>
 #include <vector>
 
+typedef std::vector<std::vector<int>> mat2i;
+typedef std::vector<mat2i> mat3i;
+
 class Algorithm
 {
 public:
-    Algorithm(const std::vector<std::vector<int>>& distances);
+    Algorithm(const mat2i& distances);
     virtual ~Algorithm();
 
-    void init(std::vector<std::vector<int>>& solution);
-    virtual bool solve(std::vector<std::vector<int>>& solution, bool optimal = false) = 0;
-    static int eval(const std::vector<std::vector<int> >& solution, const std::vector<std::vector<int>>& distances);
+    void init(mat2i& solution);
+    virtual bool solve(mat2i& solution, bool optimal = false) = 0;
+    static int eval(const std::vector<std::vector<int> >& solution, const mat2i& distances);
 
     template<typename T>
     static void printMatrix(const std::vector<std::vector<T>>& m)
@@ -40,15 +43,16 @@ public:
 protected:
     int m_teams;
     int m_rounds;
-    const std::vector<std::vector<int>>& m_distances;
-    std::vector<std::vector<std::vector<int>>>m_domain;
+    const mat2i& m_distances;
+    mat3i m_domain;
 
-    bool forwardCheck(int team, int round, const std::vector<std::vector<int>>& solution, std::vector<std::vector<std::vector<int>>>& domain);
+    bool forwardCheck(int team, int round, const mat2i& solution, mat3i& domain);
 
     class ValueSorter
     {
     public:
-        ValueSorter(int rounds, int currTeam, int currRound, const std::vector<std::vector<int>>& solution, const std::vector<std::vector<int>>& distances) : m_rounds(rounds), m_currTeam(currTeam), m_currRound(currRound), m_solution(solution), m_distances(distances)
+        ValueSorter(int rounds, int currTeam, int currRound, const mat2i& solution, const mat2i& distances) :
+                m_rounds(rounds), m_currTeam(currTeam), m_currRound(currRound), m_solution(solution), m_distances(distances)
         {
         }
 
@@ -58,8 +62,8 @@ protected:
         int m_rounds;
         int m_currTeam;
         int m_currRound;
-        const std::vector<std::vector<int>>& m_solution;
-        const std::vector<std::vector<int>>& m_distances;
+        const mat2i& m_solution;
+        const mat2i& m_distances;
     };
 };
 

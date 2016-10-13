@@ -18,12 +18,12 @@
 #include <chrono>
 using namespace std;
 
-void test(const std::vector<std::vector<int>>& distances);
+void test(const mat2i& distances);
 
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/nfl18.txt");
+    fstream fs("instances/data8.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -55,9 +55,9 @@ int main()
     return 0;
 
     CPSolver solver(distances);
-    std::vector<std::vector<int>> solution;
+    mat2i solution;
     int bestCost = numeric_limits<int>::max();
-    std::vector<std::vector<int>> bestSolution;
+    mat2i bestSolution;
     solver.solve(solution);
     bestSolution = solution;
     bestCost = Algorithm::eval(bestSolution, distances);
@@ -83,7 +83,7 @@ int main()
             }
         }
 
-        if (solver.solve(solution, true))
+        if (solver.solve(solution, false))
         {
             int costs = Algorithm::eval(solution, distances);
             if (costs < bestCost)
@@ -103,11 +103,11 @@ int main()
     return 0;
 }
 
-void test(const std::vector<std::vector<int>>& distances)
+void test(const mat2i& distances)
 {
     auto start = std::chrono::high_resolution_clock::now();
     CPSolver solver(distances);
-    std::vector<std::vector<int>> solution;
+    mat2i solution;
     solver.solve(solution, false);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

@@ -8,7 +8,7 @@
 #include "Algorithm.h"
 #include <algorithm>
 
-Algorithm::Algorithm(const std::vector<std::vector<int>>& distances) :
+Algorithm::Algorithm(const mat2i& distances) :
         m_teams(distances.size()), m_rounds(2 * distances.size() - 2), m_distances(distances)
 {
 }
@@ -30,7 +30,7 @@ void Algorithm::init(std::vector<std::vector<int> >& solution)
 
     for (int t = 0; t < m_teams; t++)
     {
-        m_domain.push_back(std::vector<std::vector<int>>());
+        m_domain.push_back(mat2i());
         for (int r = 0; r < m_rounds; r++)
         {
             m_domain[t].push_back(initDomain);
@@ -78,9 +78,12 @@ int Algorithm::getNumRounds()
     return m_rounds;
 }
 
-bool Algorithm::forwardCheck(int team, int round, const std::vector<std::vector<int>>& solution, std::vector<std::vector<std::vector<int>>>& domain)
+bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& domain)
 {
     int value = solution[team - 1][round];
+
+    if (std::find(domain[team - 1][round].begin(), domain[team - 1][round].end(), value) == domain[team - 1][round].end())
+        return false;
 
     /*
      * Every team plays only 1 game each round
@@ -88,13 +91,13 @@ bool Algorithm::forwardCheck(int team, int round, const std::vector<std::vector<
      */
     for (int i = 0; i < m_teams; i++)
     {
-        if(solution[i][round] == 0)
+        if (solution[i][round] == 0)
         {
             std::vector<int>& _domain = domain[i][round];
             _domain.erase(std::remove(_domain.begin(), _domain.end(), value), _domain.end());
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
             if (_domain.empty())
-            return false;
+                return false;
         }
     }
 
@@ -104,23 +107,23 @@ bool Algorithm::forwardCheck(int team, int round, const std::vector<std::vector<
      */
     for (int i = 0; i < m_rounds; i++)
     {
-        if(solution[team - 1][i] == 0)
+        if (solution[team - 1][i] == 0)
         {
             std::vector<int>& _domain = domain[team - 1][i];
             _domain.erase(std::remove(_domain.begin(), _domain.end(), value), _domain.end());
             if (_domain.empty())
-            return false;
+                return false;
         }
     }
 
     /*
      * Opponent team has to play against this team: Set domain of the variable of the opponent game to -X[team][round]
      */
-    if(solution[std::abs(value) - 1][round] == 0)
+    if (solution[std::abs(value) - 1][round] == 0)
     {
         std::vector<int>& opponentDomain = domain[std::abs(value) - 1][round];
         int opponent;
-        if(value < 0)
+        if (value < 0)
         {
             opponent = team;
         } else
@@ -142,24 +145,24 @@ bool Algorithm::forwardCheck(int team, int round, const std::vector<std::vector<
     /*
      * Repeated games not allowed, remove -X[team][round] from domain of variable X[team][round+1] and X[team][round-1]
      */
-    if(round > 0)
+    if (round > 0)
     {
-        if(solution[team-1][round-1] == 0)
+        if (solution[team - 1][round - 1] == 0)
         {
-            std::vector<int>& _domain = domain[team-1][round-1];
+            std::vector<int>& _domain = domain[team - 1][round - 1];
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
-            if(_domain.empty())
-            return false;
+            if (_domain.empty())
+                return false;
         }
     }
-    if(round < m_rounds-1)
+    if (round < m_rounds - 1)
     {
-        if(solution[team-1][round+1] == 0)
+        if (solution[team - 1][round + 1] == 0)
         {
-            std::vector<int>& _domain = domain[team-1][round+1];
+            std::vector<int>& _domain = domain[team - 1][round + 1];
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
-            if(_domain.empty())
-            return false;
+            if (_domain.empty())
+                return false;
         }
     }
 
@@ -168,46 +171,46 @@ bool Algorithm::forwardCheck(int team, int round, const std::vector<std::vector<
      * home or away games, if number is U -> remove all negative or positive values from domain of the unassigned variables domain
      */
     int u = 3;
-    for(int i = round - u; i < round + 1; i++)
+    for (int i = round - u; i < round + 1; i++)
     {
-        if(i >= 0 && i < m_rounds)
+        if (i >= 0 && i < m_rounds)
         {
             int countAway = 0;
             int countHome = 0;
             std::vector<std::vector<int>*> domainsOfVars;
-            for(int j = 0; j < u+1; j++)
+            for (int j = 0; j < u + 1; j++)
             {
-                if(i + j < m_rounds)
+                if (i + j < m_rounds)
                 {
-                    if(solution[team-1][i+j] < 0)
+                    if (solution[team - 1][i + j] < 0)
                     {
                         countAway++;
-                    } else if(solution[team-1][i+j] > 0)
+                    } else if (solution[team - 1][i + j] > 0)
                     {
                         countHome++;
                     } else
                     {
-                        domainsOfVars.push_back(&domain[team-1][i+j]);
+                        domainsOfVars.push_back(&domain[team - 1][i + j]);
                     }
                 }
             }
-            if(countAway == u)
+            if (countAway == u)
             {
-                for(auto d : domainsOfVars)
+                for (auto d : domainsOfVars)
                 {
                     d->erase(std::remove_if(d->begin(), d->end(), [](int x)
-                            {   return x < 0;}), d->end());
-                    if(d->empty())
-                    return false;
+                    {   return x < 0;}), d->end());
+                    if (d->empty())
+                        return false;
                 }
-            } else if(countHome == u)
+            } else if (countHome == u)
             {
-                for(auto d : domainsOfVars)
+                for (auto d : domainsOfVars)
                 {
                     d->erase(std::remove_if(d->begin(), d->end(), [](int x)
-                            {   return x > 0;}), d->end());
-                    if(d->empty())
-                    return false;
+                    {   return x > 0;}), d->end());
+                    if (d->empty())
+                        return false;
                 }
             }
         }
@@ -215,7 +218,7 @@ bool Algorithm::forwardCheck(int team, int round, const std::vector<std::vector<
     return true;
 }
 
-int Algorithm::eval(const std::vector<std::vector<int> >& solution, const std::vector<std::vector<int>>& distances)
+int Algorithm::eval(const std::vector<std::vector<int> >& solution, const mat2i& distances)
 {
     int costs = 0;
     int teams = distances.size();

@@ -17,15 +17,15 @@
 class CPSolver: public Algorithm
 {
 public:
-    CPSolver(const std::vector<std::vector<int>>& distances);
+    CPSolver(const mat2i& distances);
     virtual ~CPSolver();
-    virtual bool solve(std::vector<std::vector<int>>& solution, bool optimal = false);
+    virtual bool solve(mat2i& solution, bool optimal = false);
 
 private:
     int m_bestCosts;
     bool m_solutionFound;
     bool m_searchOptimum;
-    bool backTrack(int team, int round, std::vector<std::vector<int>>& solution, std::vector<std::vector<std::vector<int>>>& domain, std::vector<std::vector<int>>& solutionOut);
+    bool backTrack(int team, int round, mat2i& solution, mat3i& domain, mat2i& solutionOut);
 };
 
 #endif /* CPSOLVER_H_ */
