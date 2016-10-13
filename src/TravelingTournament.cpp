@@ -23,7 +23,7 @@ void test(const mat2i& distances);
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/data8.txt");
+    fstream fs("instances/nfl20.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;

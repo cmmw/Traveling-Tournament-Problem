@@ -61,7 +61,6 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
     }
 
     std::vector<int>& values = domain[team - 1][round];
-    std::random_shuffle(values.begin(), values.end());
     for (auto d : values)
     {
         auto domainCopy = domain;
