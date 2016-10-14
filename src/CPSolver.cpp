@@ -27,15 +27,15 @@ bool CPSolver::solve(mat2i& solution, bool optimal)
     m_solutionFound = false;
     m_searchOptimum = optimal;
     mat2i solutionCpy = solution;
-    backTrack(1, 0, solutionCpy, m_domain, solution);
+    backTrack(0, 0, solutionCpy, m_domain, solution);
     return m_solutionFound;
 }
 
 bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, mat2i& solutionOut)
 {
-    if (team > m_teams)
+    if (team >= m_teams)
     {
-        return backTrack(1, round + 1, solution, domain, solutionOut);
+        return backTrack(0, round + 1, solution, domain, solutionOut);
     }
     if (round >= m_rounds)
     {
@@ -55,24 +55,24 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
         return true;
     }
 
-    if (solution[team - 1][round] != 0)
+    if (solution[team][round] != 0)
     {
         return backTrack(team + 1, round, solution, domain, solutionOut);
     }
 
-    std::vector<int>& values = domain[team - 1][round];
+    std::vector<int>& values = domain[team][round];
     for (auto d : values)
     {
         std::vector<DomainEntry> domainBackups;
-        solution[team - 1][round] = d;
+        solution[team][round] = d;
         if (d < 0)
         {
-            solution[-d - 1][round] = team;
+            solution[-d - 1][round] = (team + 1);
         } else
         {
-            solution[d - 1][round] = -team;
+            solution[d - 1][round] = -(team + 1);
         }
-        if (Algorithm::forwardCheck(team, round, solution, domain, domainBackups) && Algorithm::forwardCheck(std::abs(d), round, solution, domain, domainBackups))
+        if (Algorithm::forwardCheck(team, round, solution, domain, domainBackups) && Algorithm::forwardCheck(std::abs(d) - 1, round, solution, domain, domainBackups))
         {
             if (backTrack(team + 1, round, solution, domain, solutionOut))
             {
@@ -85,7 +85,7 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
             domain[b.m_team][b.m_round] = b.m_backup;
         }
     }
-    solution[team - 1][round] = 0;
+    solution[team][round] = 0;
     return false;
 }
 

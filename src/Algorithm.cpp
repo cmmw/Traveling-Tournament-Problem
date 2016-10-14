@@ -58,7 +58,7 @@ void Algorithm::init(std::vector<std::vector<int> >& solution)
                 if (solution[t][r] != 0)
                 {
                     std::vector<DomainEntry> domainBackup;
-                    if (!forwardCheck(t + 1, r, solution, m_domain, domainBackup))
+                    if (!forwardCheck(t, r, solution, m_domain, domainBackup))
                     {
                         std::cerr << "Inconsistent solution" << std::endl;
                         exit(1);
@@ -81,9 +81,9 @@ int Algorithm::getNumRounds()
 
 bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& domain, std::vector<DomainEntry>& domainBackup)
 {
-    int value = solution[team - 1][round];
+    int value = solution[team][round];
 
-    if (std::find(domain[team - 1][round].begin(), domain[team - 1][round].end(), value) == domain[team - 1][round].end())
+    if (std::find(domain[team][round].begin(), domain[team][round].end(), value) == domain[team][round].end())
         return false;
 
     /*
@@ -110,11 +110,11 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
      */
     for (int i = 0; i < m_rounds; i++)
     {
-        if (solution[team - 1][i] == 0)
+        if (solution[team][i] == 0)
         {
-            std::vector<int>& _domain = domain[team - 1][i];
-            if (!contains(team - 1, i, domainBackup))
-                domainBackup.push_back(DomainEntry(team - 1, i, _domain));
+            std::vector<int>& _domain = domain[team][i];
+            if (!contains(team, i, domainBackup))
+                domainBackup.push_back(DomainEntry(team, i, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), value), _domain.end());
             if (_domain.empty())
                 return false;
@@ -154,11 +154,11 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
      */
     if (round > 0)
     {
-        if (solution[team - 1][round - 1] == 0)
+        if (solution[team][round - 1] == 0)
         {
-            std::vector<int>& _domain = domain[team - 1][round - 1];
-            if (!contains(team - 1, round - 1, domainBackup))
-                domainBackup.push_back(DomainEntry(team - 1, round - 1, _domain));
+            std::vector<int>& _domain = domain[team][round - 1];
+            if (!contains(team, round - 1, domainBackup))
+                domainBackup.push_back(DomainEntry(team, round - 1, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
             if (_domain.empty())
                 return false;
@@ -166,11 +166,11 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
     }
     if (round < m_rounds - 1)
     {
-        if (solution[team - 1][round + 1] == 0)
+        if (solution[team][round + 1] == 0)
         {
-            std::vector<int>& _domain = domain[team - 1][round + 1];
-            if (!contains(team - 1, round + 1, domainBackup))
-                domainBackup.push_back(DomainEntry(team - 1, round + 1, _domain));
+            std::vector<int>& _domain = domain[team][round + 1];
+            if (!contains(team, round + 1, domainBackup))
+                domainBackup.push_back(DomainEntry(team, round + 1, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
             if (_domain.empty())
                 return false;
@@ -193,17 +193,17 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
             {
                 if (i + j < m_rounds)
                 {
-                    if (solution[team - 1][i + j] < 0)
+                    if (solution[team][i + j] < 0)
                     {
                         countAway++;
-                    } else if (solution[team - 1][i + j] > 0)
+                    } else if (solution[team][i + j] > 0)
                     {
                         countHome++;
                     } else
                     {
-                        domainsOfVars.push_back(&domain[team - 1][i + j]);
-                        if (!contains(team - 1, i + j, domainBackup))
-                            domainBackup.push_back(DomainEntry(team - 1, i + j, domain[team - 1][i + j]));
+                        domainsOfVars.push_back(&domain[team][i + j]);
+                        if (!contains(team, i + j, domainBackup))
+                            domainBackup.push_back(DomainEntry(team, i + j, domain[team][i + j]));
                     }
                 }
             }
@@ -279,33 +279,5 @@ int Algorithm::eval(const std::vector<std::vector<int> >& solution, const mat2i&
             costs += distances[std::abs(opponent) - 1][team];
     }
     return costs;
-}
-
-bool Algorithm::ValueSorter::operator()(int value1, int value2)
-{
-    int costs1 = 0;
-    int costs2 = 0;
-    value1 = std::abs(value1);
-    value2 = std::abs(value2);
-    if (m_currRound > 0)
-    {
-        int opponent = m_solution[m_currTeam - 1][m_currRound - 1];
-        if (opponent != 0)
-        {
-            costs1 += m_distances[std::abs(opponent) - 1][value1 - 1];
-            costs2 += m_distances[std::abs(opponent) - 1][value2 - 1];
-        }
-    }
-
-    if (m_currRound < m_rounds - 2)
-    {
-        int opponent = m_solution[m_currTeam - 1][m_currRound + 1];
-        if (opponent != 0)
-        {
-            costs1 += m_distances[value1 - 1][std::abs(opponent) - 1];
-            costs2 += m_distances[value2 - 1][std::abs(opponent) - 1];
-        }
-    }
-    return costs1 < costs2;
 }
 

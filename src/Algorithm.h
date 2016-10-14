@@ -33,7 +33,6 @@ public:
     Algorithm(const mat2i& distances);
     virtual ~Algorithm();
 
-    void init(mat2i& solution);
     virtual bool solve(mat2i& solution, bool optimal = false) = 0;
     static int eval(const std::vector<std::vector<int> >& solution, const mat2i& distances);
 
@@ -59,26 +58,10 @@ protected:
     const mat2i& m_distances;
     mat3i m_domain;
 
+    void init(mat2i& solution);
     bool forwardCheck(int team, int round, const mat2i& solution, mat3i& domain, std::vector<DomainEntry>& domainBackup);
-    bool contains(int team, int round, const std::vector<DomainEntry>& domainBackup);
+    static bool contains(int team, int round, const std::vector<DomainEntry>& domainBackup);
 
-    class ValueSorter
-    {
-    public:
-        ValueSorter(int rounds, int currTeam, int currRound, const mat2i& solution, const mat2i& distances) :
-                m_rounds(rounds), m_currTeam(currTeam), m_currRound(currRound), m_solution(solution), m_distances(distances)
-        {
-        }
-
-        bool operator()(int value1, int value2);
-
-    private:
-        int m_rounds;
-        int m_currTeam;
-        int m_currRound;
-        const mat2i& m_solution;
-        const mat2i& m_distances;
-    };
 };
 
 #endif /* ALGORITHM_H_ */
