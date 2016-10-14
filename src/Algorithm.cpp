@@ -57,7 +57,8 @@ void Algorithm::init(std::vector<std::vector<int> >& solution)
             {
                 if (solution[t][r] != 0)
                 {
-                    if (!forwardCheck(t + 1, r, solution, m_domain))
+                    std::vector<DomainEntry> domainBackup;
+                    if (!forwardCheck(t + 1, r, solution, m_domain, domainBackup))
                     {
                         std::cerr << "Inconsistent solution" << std::endl;
                         exit(1);
@@ -78,7 +79,7 @@ int Algorithm::getNumRounds()
     return m_rounds;
 }
 
-bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& domain)
+bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& domain, std::vector<DomainEntry>& domainBackup)
 {
     int value = solution[team - 1][round];
 
@@ -94,6 +95,8 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
         if (solution[i][round] == 0)
         {
             std::vector<int>& _domain = domain[i][round];
+            if (!contains(i, round, domainBackup))
+                domainBackup.push_back(DomainEntry(i, round, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), value), _domain.end());
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
             if (_domain.empty())
@@ -110,6 +113,8 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
         if (solution[team - 1][i] == 0)
         {
             std::vector<int>& _domain = domain[team - 1][i];
+            if (!contains(team - 1, i, domainBackup))
+                domainBackup.push_back(DomainEntry(team - 1, i, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), value), _domain.end());
             if (_domain.empty())
                 return false;
@@ -136,6 +141,8 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
             return false;
         } else
         {
+            if (!contains(std::abs(value) - 1, round, domainBackup))
+                domainBackup.push_back(DomainEntry(std::abs(value) - 1, round, opponentDomain));
             opponentDomain.clear();
             opponentDomain.push_back(opponent);
         }
@@ -150,6 +157,8 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
         if (solution[team - 1][round - 1] == 0)
         {
             std::vector<int>& _domain = domain[team - 1][round - 1];
+            if (!contains(team - 1, round - 1, domainBackup))
+                domainBackup.push_back(DomainEntry(team - 1, round - 1, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
             if (_domain.empty())
                 return false;
@@ -160,6 +169,8 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
         if (solution[team - 1][round + 1] == 0)
         {
             std::vector<int>& _domain = domain[team - 1][round + 1];
+            if (!contains(team - 1, round + 1, domainBackup))
+                domainBackup.push_back(DomainEntry(team - 1, round + 1, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
             if (_domain.empty())
                 return false;
@@ -191,6 +202,8 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
                     } else
                     {
                         domainsOfVars.push_back(&domain[team - 1][i + j]);
+                        if (!contains(team - 1, i + j, domainBackup))
+                            domainBackup.push_back(DomainEntry(team - 1, i + j, domain[team - 1][i + j]));
                     }
                 }
             }
@@ -216,6 +229,16 @@ bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& 
         }
     }
     return true;
+}
+
+bool Algorithm::contains(int team, int round, const std::vector<DomainEntry>& domainBackup)
+{
+    for (auto& x : domainBackup)
+    {
+        if (x.m_team == team && round == x.m_round)
+            return true;
+    }
+    return false;
 }
 
 int Algorithm::eval(const std::vector<std::vector<int> >& solution, const mat2i& distances)
@@ -285,3 +308,4 @@ bool Algorithm::ValueSorter::operator()(int value1, int value2)
     }
     return costs1 < costs2;
 }
+

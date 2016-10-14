@@ -14,6 +14,19 @@
 typedef std::vector<std::vector<int>> mat2i;
 typedef std::vector<mat2i> mat3i;
 
+class DomainEntry
+{
+public:
+    DomainEntry(int team, int round, const std::vector<int>& backup) :
+            m_team(team), m_round(round), m_backup(backup)
+    {
+    }
+
+    int m_team;
+    int m_round;
+    std::vector<int> m_backup;
+};
+
 class Algorithm
 {
 public:
@@ -46,7 +59,8 @@ protected:
     const mat2i& m_distances;
     mat3i m_domain;
 
-    bool forwardCheck(int team, int round, const mat2i& solution, mat3i& domain);
+    bool forwardCheck(int team, int round, const mat2i& solution, mat3i& domain, std::vector<DomainEntry>& domainBackup);
+    bool contains(int team, int round, const std::vector<DomainEntry>& domainBackup);
 
     class ValueSorter
     {
