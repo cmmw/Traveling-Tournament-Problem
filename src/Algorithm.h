@@ -49,9 +49,6 @@ public:
         }
     }
 
-    int getNumTeams();
-    int getNumRounds();
-
 protected:
     int m_teams;
     int m_rounds;
@@ -61,6 +58,13 @@ protected:
     void init(mat2i& solution);
     bool forwardCheck(int team, int round, const mat2i& solution, mat3i& domain, std::vector<DomainEntry>& domainBackup);
     static bool contains(int team, int round, const std::vector<DomainEntry>& domainBackup);
+    static bool getMrv(int& team, int& round, const mat2i& solution, const mat3i& domain);
+    int ruledOutValues(int team, int round, int value, const mat2i& solution, const mat3i& domain);
+    int ruledOutHorizontal(int team, int round, int value, const mat2i& solution, const mat3i& domain);
+    int ruledOutVertical(int team, int round, int value, const mat2i& solution, const mat3i& domain);
+    int ruledOutOpponent(int team, int round, int value, const mat2i& solution, const mat3i& domain);
+    int ruledOutNoRepeat(int team, int round, int value, const mat2i& solution, const mat3i& domain);
+    int ruledOutAtMost(int team, int round, int value, const mat2i& solution, const mat3i& domain);
 
 };
 

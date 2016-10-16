@@ -69,16 +69,6 @@ void Algorithm::init(std::vector<std::vector<int> >& solution)
     }
 }
 
-int Algorithm::getNumTeams()
-{
-    return m_teams;
-}
-
-int Algorithm::getNumRounds()
-{
-    return m_rounds;
-}
-
 bool Algorithm::forwardCheck(int team, int round, const mat2i& solution, mat3i& domain, std::vector<DomainEntry>& domainBackup)
 {
     int value = solution[team][round];
@@ -281,3 +271,188 @@ int Algorithm::eval(const std::vector<std::vector<int> >& solution, const mat2i&
     return costs;
 }
 
+bool Algorithm::getMrv(int& team, int& round, const mat2i& solution, const mat3i& domain)
+{
+    bool found = false;
+    int teams = solution.size();
+    int rounds = solution[0].size();
+    int currDomSize = std::numeric_limits<int>::max();
+    for (int t = 0; t < teams; t++)
+    {
+        for (int r = 0; r < rounds; r++)
+        {
+            if (solution[t][r] != 0)
+                continue;
+            int s = domain[t][r].size();
+            if (s < currDomSize)
+            {
+                currDomSize = s;
+                team = t;
+                round = r;
+                found = true;
+            }
+        }
+    }
+    return found;
+}
+
+int Algorithm::ruledOutValues(int team, int round, int value, const mat2i& solution, const mat3i& domain)
+{
+    int ruledOut = 0;
+    ruledOut += ruledOutHorizontal(team, round, value, solution, domain);
+    ruledOut += ruledOutVertical(team, round, value, solution, domain);
+    ruledOut += ruledOutOpponent(team, round, value, solution, domain);
+    ruledOut += ruledOutNoRepeat(team, round, value, solution, domain);
+    ruledOut += ruledOutAtMost(team, round, value, solution, domain);
+
+    //Opponent is also set and will restrict values
+    int tmp = team;
+    if (value < 0)
+    {
+        team = -value - 1;
+        value = tmp + 1;
+    } else
+    {
+        team = value - 1;
+        value = -(tmp + 1);
+    }
+    ruledOut += ruledOutHorizontal(team, round, value, solution, domain);
+    ruledOut += ruledOutNoRepeat(team, round, value, solution, domain);
+    ruledOut += ruledOutAtMost(team, round, value, solution, domain);
+    return ruledOut;
+}
+
+int Algorithm::ruledOutHorizontal(int team, int round, int value, const mat2i& solution, const mat3i& domain)
+{
+    int cnt = 0;
+    /*
+     * Every team plays exactly once against each other team at home and away
+     */
+    for (int i = 0; i < m_rounds; i++)
+    {
+        if (i != round && solution[team][i] == 0)
+        {
+            const std::vector<int>& _domain = domain[team][i];
+            if (std::find(_domain.begin(), _domain.end(), value) != _domain.end())
+                cnt++;
+        }
+    }
+    return cnt;
+}
+
+int Algorithm::ruledOutVertical(int team, int round, int value, const mat2i& solution, const mat3i& domain)
+{
+    int cnt = 0;
+    /*
+     * Every team plays only 1 game each round
+     */
+    for (int i = 0; i < m_teams; i++)
+    {
+        if (i != team && solution[i][round] == 0)
+        {
+            const std::vector<int>& _domain = domain[i][round];
+            if (std::find(_domain.begin(), _domain.end(), value) != _domain.end())
+                cnt++;
+            if (std::find(_domain.begin(), _domain.end(), -value) != _domain.end())
+                cnt++;
+        }
+    }
+    return cnt;
+}
+
+int Algorithm::ruledOutOpponent(int team, int round, int value, const mat2i& solution, const mat3i& domain)
+{
+    int cnt = 0;
+    /*
+     * Opponent team has to play against this team: Set domain of the variable of the opponent game to -X[team][round]
+     */
+    if (solution[std::abs(value) - 1][round] == 0)
+    {
+        const std::vector<int>& opponentDomain = domain[std::abs(value) - 1][round];
+        cnt += (opponentDomain.size() - 1);
+    }
+
+    return cnt;
+}
+
+int Algorithm::ruledOutNoRepeat(int team, int round, int value, const mat2i& solution, const mat3i& domain)
+{
+    int cnt = 0;
+    /*
+     * Repeated games not allowed, remove -X[team][round] from domain of variable X[team][round+1] and X[team][round-1]
+     */
+    if (round > 0)
+    {
+        if (solution[team][round - 1] == 0)
+        {
+            const std::vector<int>& _domain = domain[team][round - 1];
+            if (std::find(_domain.begin(), _domain.end(), -value) != _domain.end())
+                cnt++;
+        }
+    }
+    if (round < m_rounds - 1)
+    {
+        if (solution[team][round + 1] == 0)
+        {
+            const std::vector<int>& _domain = domain[team][round + 1];
+            if (std::find(_domain.begin(), _domain.end(), -value) != _domain.end())
+                cnt++;
+        }
+    }
+    return cnt;
+}
+
+int Algorithm::ruledOutAtMost(int team, int round, int value, const mat2i& solution, const mat3i& domain)
+{
+    int cnt = 0;
+    /*
+     * At most U (fixed to 3 for now) consecutive games home or away: take all subsets of consecutive variables with length U+1 and count number of
+     * home or away games, if number is U -> remove all negative or positive values from domain of the unassigned variables domain
+     */
+    int u = 3;
+    for (int i = round - u; i < round + 1; i++)
+    {
+        if (i >= 0 && i < m_rounds)
+        {
+            int countAway = 0;
+            int countHome = 0;
+            if (value < 0)
+                countAway++;
+            else
+                countHome++;
+            std::vector<const std::vector<int>*> domainsOfVars;
+            for (int j = 0; j < u + 1; j++)
+            {
+                if (i + j < m_rounds)
+                {
+                    if (i + j != round && solution[team][i + j] < 0)
+                    {
+                        countAway++;
+                    } else if (i + j != round && solution[team][i + j] > 0)
+                    {
+                        countHome++;
+                    } else if (i + j != round)
+                    {
+                        domainsOfVars.push_back(&domain[team][i + j]);
+                    }
+                }
+            }
+            if (countAway == u)
+            {
+                for (auto d : domainsOfVars)
+                {
+                    cnt += std::count_if(d->begin(), d->end(), [](int x)
+                    {   return x < 0;});
+                }
+            } else if (countHome == u)
+            {
+                for (auto d : domainsOfVars)
+                {
+                    cnt += std::count_if(d->begin(), d->end(), [](int x)
+                    {   return x > 0;});
+                }
+            }
+        }
+    }
+    return cnt;
+}

@@ -22,11 +22,12 @@ using namespace std;
 void test(const mat2i& distances);
 void destroy(mat2i& solution, const mat2i& distances, int size);
 int nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances);
+int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances);
 
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/data16.txt");
+    fstream fs("instances/nfl32.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -66,7 +67,7 @@ int main()
     bestCost = Algorithm::eval(bestSolution, distances);
     std::cout << "Initial solution: " << bestCost << std::endl;
     int size = 5;
-    for (int i = 0; i < 3000; i++)
+    for (int i = 0; i < 2000; i++)
     {
         //Destroy solution
         destroy(solution, distances, size);
@@ -78,12 +79,12 @@ int main()
                 bestSolution = solution;
                 bestCost = costs;
                 i = 0;
-                size -= 15;
+                size = 10;
                 if (size < 0)
                     size = 5;
             } else
             {
-                if (size != -1 && size < 40)
+                if (size != -1 && size < 130)
                 {
                     size++;
                 } else
@@ -143,8 +144,8 @@ void destroy(mat2i& solution, const mat2i& distances, int size)
                 }
                 if (skip)
                     continue;
-
-                int dist = nodeCosts(t, r, solution, distances);
+                //TODO prevent duplicate deletion of nodes
+                int dist = _nodeCosts(t, r, solution, distances);
                 auto ub = std::upper_bound(entries.begin(), entries.end(), dist, [](int value, const Entry& e)
                 {   return value < e.m_dist;});
                 if (ub != entries.begin())
@@ -166,7 +167,7 @@ void destroy(mat2i& solution, const mat2i& distances, int size)
     } else
     {
         //Random
-        for (int j = 0; j < 45; j++)
+        for (int j = 0; j < 120; j++)
         {
             int t = std::rand() % teams;
             int r = std::rand() % rounds;
@@ -191,12 +192,18 @@ void test(const mat2i& distances)
     solver.solve(solution, false);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    std::cout << std::endl;
     Algorithm::printMatrix(solution);
     std::cout << "Total distance: " << Algorithm::eval(solution, distances) << std::endl;
     std::cout << "Took: " << duration << "ms" << std::endl;
 }
 
 int nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances)
+{
+    return _nodeCosts(team, round, solution, distances) + _nodeCosts(std::abs(solution[team][round]) - 1, round, solution, distances);
+}
+
+int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances)
 {
     int costs = 0;
     int from = 0;
