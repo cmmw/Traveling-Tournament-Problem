@@ -317,6 +317,7 @@ int Algorithm::ruledOutValues(int team, int round, int value, const mat2i& solut
         value = -(tmp + 1);
     }
     ruledOut += ruledOutHorizontal(team, round, value, solution, domain);
+    ruledOut += ruledOutVertical(team, round, value, solution, domain);
     ruledOut += ruledOutNoRepeat(team, round, value, solution, domain);
     ruledOut += ruledOutAtMost(team, round, value, solution, domain);
     return ruledOut;

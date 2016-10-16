@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+#include <map>
 
 CPSolver::CPSolver(const mat2i& distances) :
         Algorithm(distances), m_bestCosts(std::numeric_limits<int>::max()), m_solutionFound(false), m_searchOptimum(false)
@@ -39,7 +40,7 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
     }
 
     if (!getMrv(team, round, solution, domain))
-    //            if (round >= m_rounds)
+    //    if (round >= m_rounds)
     {
         if (m_searchOptimum)
         {
@@ -62,10 +63,15 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
         return backTrack(team + 1, round, solution, domain, solutionOut);
     }
 
-    std::vector<int> values = domain[team][round];
+    std::vector<int>& values = domain[team][round];
 //    std::random_shuffle(values.begin(), values.end());
+    std::map<int, int> ruledOut;
+    for (unsigned int i = 0; i < values.size(); i++)
+    {
+        ruledOut[values[i]] = ruledOutValues(team, round, values[i], solution, domain);
+    }
     std::sort(values.begin(), values.end(), [&](int val1, int val2)
-    {   return ruledOutValues(team, round, val1, solution, domain) < ruledOutValues(team, round, val2, solution, domain);});
+    {   return ruledOut[val1] < ruledOut[val2];});
     for (auto d : values)
     {
         std::vector<DomainEntry> domainBackups;
