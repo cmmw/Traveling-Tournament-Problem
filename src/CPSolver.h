@@ -25,7 +25,7 @@ private:
     int m_bestCosts;
     bool m_solutionFound;
     bool m_searchOptimum;
-    bool backTrack(int team, int round, mat2i& solution, mat3i& domain, mat2i& solutionOut);
+    bool backTrack(int team, int round, mat2i& solution, mat2i& solutionOut);
 };
 
 #endif /* CPSOLVER_H_ */

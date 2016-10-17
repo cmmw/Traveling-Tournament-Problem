@@ -28,18 +28,18 @@ bool CPSolver::solve(mat2i& solution, bool optimal)
     m_solutionFound = false;
     m_searchOptimum = optimal;
     mat2i solutionCpy = solution;
-    backTrack(0, 0, solutionCpy, m_domain, solution);
+    backTrack(0, 0, solutionCpy, solution);
     return m_solutionFound;
 }
 
-bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, mat2i& solutionOut)
+bool CPSolver::backTrack(int team, int round, mat2i& solution, mat2i& solutionOut)
 {
     if (team >= m_teams)
     {
-        return backTrack(0, round + 1, solution, domain, solutionOut);
+        return backTrack(0, round + 1, solution, solutionOut);
     }
 
-    if (!getMrv(team, round, solution, domain))
+    if (!getMrv(team, round, solution, m_domain))
     //    if (round >= m_rounds)
     {
         if (m_searchOptimum)
@@ -60,15 +60,15 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
 
     if (solution[team][round] != 0)
     {
-        return backTrack(team + 1, round, solution, domain, solutionOut);
+        return backTrack(team + 1, round, solution, solutionOut);
     }
 
-    std::vector<int>& values = domain[team][round];
+    std::vector<int>& values = m_domain[team][round];
 //    std::random_shuffle(values.begin(), values.end());
     std::map<int, int> ruledOut;
     for (unsigned int i = 0; i < values.size(); i++)
     {
-        ruledOut[values[i]] = ruledOutValues(team, round, values[i], solution, domain);
+        ruledOut[values[i]] = ruledOutValues(team, round, values[i], solution, m_domain);
     }
     std::sort(values.begin(), values.end(), [&](int val1, int val2)
     {   return ruledOut[val1] < ruledOut[val2];});
@@ -83,9 +83,9 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
         {
             solution[d - 1][round] = -(team + 1);
         }
-        if (Algorithm::forwardCheck(team, round, solution, domain, domainBackups) && Algorithm::forwardCheck(std::abs(d) - 1, round, solution, domain, domainBackups))
+        if (Algorithm::forwardCheck(team, round, solution, m_domain, domainBackups) && Algorithm::forwardCheck(std::abs(d) - 1, round, solution, m_domain, domainBackups))
         {
-            if (backTrack(team + 1, round, solution, domain, solutionOut))
+            if (backTrack(team + 1, round, solution, solutionOut))
             {
                 return true;
             }
@@ -93,7 +93,7 @@ bool CPSolver::backTrack(int team, int round, mat2i& solution, mat3i& domain, ma
         solution[std::abs(d) - 1][round] = 0;
         for (auto& b : domainBackups)
         {
-            domain[b.m_team][b.m_round] = b.m_backup;
+            m_domain[b.m_team][b.m_round] = b.m_backup;
         }
     }
     solution[team][round] = 0;
