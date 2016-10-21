@@ -457,3 +457,159 @@ int Algorithm::ruledOutAtMost(int team, int round, int value, const mat2i& solut
     }
     return cnt;
 }
+
+int Algorithm::conflicts(const mat2i& solution)
+{
+    int conflicts = 0;
+    int teams = solution.size();
+    int rounds = solution[0].size();
+
+    /*
+     * Every team plays only 1 game each round
+     */
+    for (int r = 0; r < rounds; r++)
+    {
+        std::vector<int> teamPlays(teams);
+        for (int t = 0; t < teams; t++)
+        {
+            if (solution[t][r] != 0)
+                teamPlays[std::abs(solution[t][r]) - 1]++;
+        }
+        for (auto tp : teamPlays)
+        {
+            if (tp != 1)
+                conflicts++;
+        }
+    }
+
+    /*
+     * Every team plays exactly once against each other team at home and away
+     */
+    for (int t = 0; t < teams; t++)
+    {
+        for (int opponent = -teams; opponent <= teams; opponent++)
+        {
+            if (opponent == 0 || std::abs(opponent) == (t + 1))
+                continue;
+            int count = 0;
+            for (int r = 0; r < rounds; r++)
+            {
+                if (solution[t][r] == opponent)
+                {
+                    count++;
+                }
+            }
+            if (count != 1)
+                conflicts++;
+        }
+    }
+
+    /*
+     * A team can not play against itself
+     */
+    for (int r = 0; r < rounds; r++)
+    {
+        for (int t = 0; t < teams; t++)
+        {
+            if (std::abs(solution[t][r]) == t + 1)
+                conflicts++;
+        }
+    }
+
+    /*
+     * Opponent team has to play against this team
+     */
+
+    //Additional constraints:
+    /*
+     * Repeated games not allowed
+     */
+    for (int r = 1; r < rounds; r++)
+    {
+        for (int t = 0; t < teams; t++)
+        {
+            if (std::abs(solution[t][r - 1]) == std::abs(solution[t][r]))
+                conflicts++;
+        }
+    }
+
+    /*
+     * At most U (fixed to 3 for now) consecutive games home or away
+     */
+
+    return conflicts;
+}
+
+std::set<std::pair<int, int>> Algorithm::getConflicted(const mat2i& solution)
+{
+    std::set<std::pair<int, int>> conflicted;
+    int teams = solution.size();
+    int rounds = solution[0].size();
+
+    /*
+     * Every team plays only 1 game each round
+     */
+    for (int r = 0; r < rounds; r++)
+    {
+        for (int t1 = 0; t1 < teams; t1++)
+        {
+            int curr = std::abs(solution[t1][r]);
+            for (int t2 = 0; t2 < teams; t2++)
+            {
+                if (t2 != t1 && std::abs(solution[t2][r]) == curr)
+                {
+                    conflicted.insert(std::make_pair(t1, r));
+                    break;
+                }
+            }
+        }
+    }
+
+    /*
+     * Every team plays exactly once against each other team at home and away
+     */
+    for (int t = 0; t < teams; t++)
+    {
+        for (int r1 = 0; r1 < rounds; r1++)
+        {
+            int curr = solution[t][r1];
+            for (int r2 = 0; r2 < rounds; r2++)
+            {
+                if (r1 != r2 && solution[t][r2] == curr)
+                {
+                    conflicted.insert(std::make_pair(t, r1));
+                    break;
+                }
+            }
+        }
+    }
+
+    /*
+     * A team can not play against itself
+     */
+    for (int r = 0; r < rounds; r++)
+    {
+        for (int t = 0; t < teams; t++)
+        {
+            if (std::abs(solution[t][r]) == t + 1)
+            {
+                conflicted.insert(std::make_pair(t, r));
+            }
+        }
+    }
+
+    //Additional constraints:
+    /*
+     * Repeated games not allowed
+     */
+    for (int r = 1; r < rounds; r++)
+    {
+        for (int t = 0; t < teams; t++)
+        {
+            if (std::abs(solution[t][r - 1]) == std::abs(solution[t][r]))
+                conflicted.insert(std::make_pair(t, r - 1));
+        }
+    }
+
+    return conflicted;
+}

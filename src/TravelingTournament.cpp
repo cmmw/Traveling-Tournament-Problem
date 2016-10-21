@@ -6,8 +6,9 @@
 // Description : Hello World in C++, Ansi-style
 //============================================================================
 
-#include "CPSolver.h"
 #include "Algorithm.h"
+#include "CPSolver.h"
+#include "ConstHeu.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -23,11 +24,12 @@ void test(const mat2i& distances);
 void destroy(mat2i& solution, const mat2i& distances, int size);
 int nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances);
 int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances);
+void testConst(const mat2i& distances);
 
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/nfl18.txt");
+    fstream fs("instances/data8.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -55,7 +57,8 @@ int main()
     Algorithm::printMatrix(distances);
     std::cout << "-----------" << std::endl;
 
-    test(distances);
+    testConst(distances);
+//    test(distances);
     return 0;
 
     CPSolver solver(distances);
@@ -231,4 +234,17 @@ int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distance
         costs += distances[team][std::abs(to) - 1];
 
     return costs;
+}
+
+void testConst(const mat2i& distances)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+    ConstHeu solver(distances);
+    mat2i solution;
+    solver.solve(solution, false);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    Algorithm::printMatrix(solution);
+    std::cout << "Total distance: " << Algorithm::eval(solution, distances) << std::endl;
+    std::cout << "Took: " << duration << "ms" << std::endl;
 }

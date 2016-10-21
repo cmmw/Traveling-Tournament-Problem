@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 
 typedef std::vector<std::vector<int>> mat2i;
 typedef std::vector<mat2i> mat3i;
@@ -66,6 +67,8 @@ protected:
     int ruledOutNoRepeat(int team, int round, int value, const mat2i& solution, const mat3i& domain);
     int ruledOutAtMost(int team, int round, int value, const mat2i& solution, const mat3i& domain);
 
+    static int conflicts(const mat2i& solution);
+    static std::set<std::pair<int, int>> getConflicted(const mat2i& solution);
 };
 
 #endif /* ALGORITHM_H_ */
