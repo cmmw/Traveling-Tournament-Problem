@@ -5,19 +5,20 @@
  *      Author: Christian
  */
 
-#include "ConstHeu.h"
+#include "ConstHillClimber.h"
+
 #include <algorithm>
 
-ConstHeu::ConstHeu(const mat2i& distances) :
+ConstHillClimber::ConstHillClimber(const mat2i& distances) :
         Algorithm(distances)
 {
 }
 
-ConstHeu::~ConstHeu()
+ConstHillClimber::~ConstHillClimber()
 {
 }
 
-bool ConstHeu::solve(mat2i& solution, bool optimal)
+bool ConstHillClimber::solve(mat2i& solution, bool optimal)
 {
     solution.clear();
     init(solution);

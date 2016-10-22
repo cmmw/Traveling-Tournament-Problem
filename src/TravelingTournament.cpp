@@ -8,6 +8,7 @@
 
 #include "Algorithm.h"
 #include "CPSolver.h"
+#include "GraphColorHeu.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -17,20 +18,20 @@
 #include <ctime>
 #include <chrono>
 #include <algorithm>
+#include "ConstHillClimber.h"
 
-#include "GraphColorHeu.h"
 using namespace std;
 
+template<class T>
 void test(const mat2i& distances);
 void destroy(mat2i& solution, const mat2i& distances, int size);
 int nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances);
 int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances);
-void testConst(const mat2i& distances);
 
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/nfl28.txt");
+    fstream fs("instances/nfl24.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -58,8 +59,9 @@ int main()
     Algorithm::printMatrix(distances);
     std::cout << "-----------" << std::endl;
 
-//    testConst(distances);
-    test(distances);
+    test<GraphColorHeu>(distances);
+    test<CPSolver>(distances);
+    test<ConstHillClimber>(distances);
     return 0;
 
     CPSolver solver(distances);
@@ -188,20 +190,6 @@ void destroy(mat2i& solution, const mat2i& distances, int size)
     }
 }
 
-void test(const mat2i& distances)
-{
-    auto start = std::chrono::high_resolution_clock::now();
-    CPSolver solver(distances);
-    mat2i solution;
-    solver.solve(solution, false);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << std::endl;
-    Algorithm::printMatrix(solution);
-    std::cout << "Total distance: " << Algorithm::eval(solution, distances) << std::endl;
-    std::cout << "Took: " << duration << "ms" << std::endl;
-}
-
 int nodeCosts(int team, int round, const mat2i& solution, const mat2i& distances)
 {
     return _nodeCosts(team, round, solution, distances) + _nodeCosts(std::abs(solution[team][round]) - 1, round, solution, distances);
@@ -237,10 +225,11 @@ int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distance
     return costs;
 }
 
-void testConst(const mat2i& distances)
+template<class T>
+void test(const mat2i& distances)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    GraphColorHeu solver(distances);
+    T solver(distances);
     mat2i solution;
     bool found = solver.solve(solution, false);
     auto end = std::chrono::high_resolution_clock::now();
