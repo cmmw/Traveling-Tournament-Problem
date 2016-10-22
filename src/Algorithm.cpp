@@ -290,6 +290,29 @@ bool Algorithm::getMrv(int& team, int& round, const mat2i& solution, const mat3i
                 team = t;
                 round = r;
                 found = true;
+            } else if (s == currDomSize) //Tie breaking: choose variable with more unassigned neighbors ( = nr of unassigned variables in same row and column)
+            {
+                int unassigned1 = 0, unassigned2 = 0;
+                for (int i = 0; i < teams; i++)
+                {
+                    if (solution[i][r] == 0)
+                        unassigned1++;
+                    if (solution[i][round] == 0)
+                        unassigned2++;
+                }
+                for (int i = 0; i < rounds; i++)
+                {
+                    if (solution[t][i] == 0)
+                        unassigned1++;
+                    if (solution[team][i] == 0)
+                        unassigned2++;
+                }
+
+                if (unassigned1 > unassigned2)
+                {
+                    team = t;
+                    round = r;
+                }
             }
         }
     }

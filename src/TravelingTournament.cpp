@@ -8,7 +8,6 @@
 
 #include "Algorithm.h"
 #include "CPSolver.h"
-#include "ConstHeu.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -18,6 +17,8 @@
 #include <ctime>
 #include <chrono>
 #include <algorithm>
+
+#include "GraphColorHeu.h"
 using namespace std;
 
 void test(const mat2i& distances);
@@ -29,7 +30,7 @@ void testConst(const mat2i& distances);
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/data8.txt");
+    fstream fs("instances/nfl28.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -57,8 +58,8 @@ int main()
     Algorithm::printMatrix(distances);
     std::cout << "-----------" << std::endl;
 
-    testConst(distances);
-//    test(distances);
+//    testConst(distances);
+    test(distances);
     return 0;
 
     CPSolver solver(distances);
@@ -239,12 +240,18 @@ int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distance
 void testConst(const mat2i& distances)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    ConstHeu solver(distances);
+    GraphColorHeu solver(distances);
     mat2i solution;
-    solver.solve(solution, false);
+    bool found = solver.solve(solution, false);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    Algorithm::printMatrix(solution);
+    if (found)
+    {
+        Algorithm::printMatrix(solution);
+    } else
+    {
+        std::cout << "no solution found" << std::endl;
+    }
     std::cout << "Total distance: " << Algorithm::eval(solution, distances) << std::endl;
     std::cout << "Took: " << duration << "ms" << std::endl;
 }
