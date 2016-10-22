@@ -31,7 +31,7 @@ int _nodeCosts(int team, int round, const mat2i& solution, const mat2i& distance
 int main()
 {
     srand(time(NULL));
-    fstream fs("instances/nfl24.txt");
+    fstream fs("instances/data16.txt");
     if (fs.fail())
     {
         cerr << "failed to open instance" << endl;
@@ -59,9 +59,9 @@ int main()
     Algorithm::printMatrix(distances);
     std::cout << "-----------" << std::endl;
 
-    test<GraphColorHeu>(distances);
     test<CPSolver>(distances);
-    test<ConstHillClimber>(distances);
+    test<GraphColorHeu>(distances);
+//    test<ConstHillClimber>(distances);
     return 0;
 
     CPSolver solver(distances);
