@@ -22,7 +22,7 @@ mat2i DestroyRandom::destroy(const mat2i& solution)
     mat2i destroyed = solution;
 
     //random
-    int size = m_teams * 5;
+    int size = m_teams * 4;
     std::vector<std::pair<int, int>> vars;
     for (int t = 0; t < m_teams; t++)
     {
