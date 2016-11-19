@@ -7,7 +7,7 @@
 //============================================================================
 
 #include "LNS.h"
-#include "CPSolver.h"
+#include "repair/CPSolver.h"
 #include "Factorization.h"
 #include "Common.h"
 #include <iostream>
@@ -32,7 +32,7 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data12.txt");
+    testLNS<Factorization>("instances/data8.txt");
 //    test<CPSolver>("instances/data6.txt");
 //    test<Factorization>("instances/data8.txt");
 //    benchmark<CPSolver>();

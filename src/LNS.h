@@ -8,6 +8,7 @@
 #ifndef LNS_H_
 #define LNS_H_
 
+#include "destroy/IDestroy.h"
 #include "Common.h"
 
 class LNS
@@ -20,10 +21,9 @@ public:
 
 private:
     mat2i m_distance;
-    int m_usedMethods[4] =
-            { 0 };
-    int m_methodImproved[4] =
-            { 0 };
+    std::vector<int> m_usedMethods;
+    std::vector<int> m_methodImproved;
+    std::vector<IDestroy*> m_destroyMethods;
     mat2i destroy(const mat2i& solution, int method);
     mat2i repair(const mat2i& solution);
     bool accept(const mat2i& newSol, const mat2i& oldSol);

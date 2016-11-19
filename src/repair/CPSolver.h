@@ -8,7 +8,7 @@
 #ifndef CPSOLVER_H_
 #define CPSOLVER_H_
 
-#include "Common.h"
+#include "../Common.h"
 #include <vector>
 
 class CPSolver
