@@ -25,7 +25,7 @@ void Common::printMatrix(const mat2i& matrix)
     {
         for (auto t : r)
         {
-            std::cout << std::setw(2) << std::setfill('0') << t << " ";
+            std::cout << std::setw(3) << t << " ";
         }
         std::cout << std::endl;
     }
