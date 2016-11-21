@@ -82,7 +82,7 @@ mat2i LNS::solve(const mat2i& solution)
 mat2i LNS::destroy(const mat2i& solution, int method)
 {
     m_usedMethods[method]++;
-    std::cout << method << std::endl;
+    std::cout << typeid(*m_destroyMethods[method]).name() << std::endl;
     return m_destroyMethods[method]->destroy(solution);
 }
 

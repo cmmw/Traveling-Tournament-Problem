@@ -32,27 +32,8 @@ private:
     mat2i m_bestSolution;
     mat3i m_domain;
 
-    class DomainBackupEntry
-    {
-    public:
-        DomainBackupEntry(int team, int round, const std::vector<int>& backup) :
-                m_team(team), m_round(round), m_backup(backup)
-        {
-        }
-
-        bool operator==(const DomainBackupEntry& o)
-        {
-            return (o.m_team == this->m_team && o.m_round == this->m_round);
-        }
-        int m_team;
-        int m_round;
-        std::vector<int> m_backup;
-    };
-
     void init(mat2i& solution);
     bool backTrack(mat2i& solution);
-    bool forwardCheck(int t, int r, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup);
-    bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
     bool getUnassignedVar(int& team, int& round, const mat2i& solution);
     bool getNextUnassignedVar(int& team, int& round, const mat2i& solution);
     bool getMRV(int& team, int& round, const mat2i& solution);
