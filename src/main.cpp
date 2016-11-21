@@ -8,6 +8,7 @@
 
 #include "LNS.h"
 #include "repair/CPSolver.h"
+#include "repair/DFSStar.h"
 #include "Factorization.h"
 #include "Common.h"
 #include <iostream>
@@ -34,11 +35,13 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data10.txt");
+    testLNS<Factorization>("instances/data8.txt");
 //    test<CPSolver>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");
+//    test<DFSStar>("instances/data4.txt");
 //    benchmark<CPSolver>();
 //    benchmark<Factorization>();
+//    benchmark<DFSStar>();
     return 0;
 }
 

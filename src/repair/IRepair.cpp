@@ -62,8 +62,6 @@ void IRepair::init(mat2i& solution)
 
 bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup)
 {
-    int teams = solution.size();
-    int rounds = 2 * teams - 2;
     int value = solution[team][round];
 
     if (std::find(m_domain[team][round].begin(), m_domain[team][round].end(), value) == m_domain[team][round].end())
@@ -73,7 +71,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
      * Every team plays only 1 game each round
      * Remove value of X[team][round] and -X[team][round] from the domains of all variables in the same round: X[k][round]
      */
-    for (int i = 0; i < teams; i++)
+    for (int i = 0; i < m_teams; i++)
     {
         if (solution[i][round] == 0)
         {
@@ -91,7 +89,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
      * Every team plays exactly once against each other team at home and away
      * Remove value X[team][round] from the domain of all variables with the same team: X[team][k] for all k
      */
-    for (int i = 0; i < rounds; i++)
+    for (int i = 0; i < m_rounds; i++)
     {
         if (solution[team][i] == 0)
         {
@@ -147,7 +145,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
                 return false;
         }
     }
-    if (round < rounds - 1)
+    if (round < m_rounds - 1)
     {
         if (solution[team][round + 1] == 0)
         {
@@ -167,14 +165,14 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
     int u = 3;
     for (int i = round - u; i < round + 1; i++)
     {
-        if (i >= 0 && i < rounds)
+        if (i >= 0 && i < m_rounds)
         {
             int countAway = 0;
             int countHome = 0;
             std::vector<std::vector<int>*> domainsOfVars;
             for (int j = 0; j < u + 1; j++)
             {
-                if (i + j < rounds)
+                if (i + j < m_rounds)
                 {
                     if (solution[team][i + j] < 0)
                     {

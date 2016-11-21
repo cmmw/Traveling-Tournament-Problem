@@ -20,9 +20,11 @@ public:
 
 private:
     int m_nodes;
+    int m_bestValue;
+    mat2i m_bestSolution;
 
-    bool backTrack(mat2i& solution, int i);
-
+    bool backTrack(mat2i& solution);
+    bool chooseVariable(int& team, int& round, const mat2i& solution);
 };
 
 #endif /* REPAIR_DFSSTAR_H_ */

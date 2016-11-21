@@ -13,7 +13,7 @@
 #include <iostream>
 
 CPSolver::CPSolver(const mat2i& distance) :
-        IRepair(distance), m_useMRV(true), m_useLCV(true), m_nodes(0), m_optimal(false), m_bestValue(0)
+        IRepair(distance), m_useMRV(false), m_useLCV(false), m_nodes(0), m_optimal(false), m_bestValue(0)
 {
 }
 
@@ -28,6 +28,7 @@ mat2i CPSolver::solve(const mat2i& solution, bool optimal)
     m_bestValue = std::numeric_limits<int>::max();
     init(sol);
     m_nodes = 0;
+    m_bestSolution.clear();
     backTrack(sol);
     sol = m_bestSolution;
 //    std::cout << "searched nodes: " << m_nodes << std::endl;
@@ -56,10 +57,11 @@ bool CPSolver::backTrack(mat2i& solution)
         }
     }
 
+    std::vector<int> domainCpy = m_domain[team][round];
     if (m_useLCV)
     {
         std::map<int, int> ruledOut;
-        std::vector<int>& values = m_domain[team][round];
+        std::vector<int>& values = domainCpy;
         for (unsigned int i = 0; i < values.size(); i++)
         {
             ruledOut[values[i]] = ruledOutValues(team, round, values[i], solution);
@@ -69,7 +71,7 @@ bool CPSolver::backTrack(mat2i& solution)
         {   return ruledOut[val1] < ruledOut[val2];});
     }
 
-    for (auto d : m_domain[team][round])
+    for (auto d : domainCpy)
     {
         m_nodes++;
         std::vector<DomainBackupEntry> domainBackup;
@@ -85,6 +87,7 @@ bool CPSolver::backTrack(mat2i& solution)
             if (backTrack(solution))
                 return true;
         }
+
         solution[std::abs(d) - 1][round] = 0;
         for (auto& b : domainBackup)
         {
