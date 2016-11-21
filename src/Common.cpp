@@ -8,6 +8,7 @@
 #include "Common.h"
 #include <iostream>
 #include <algorithm>
+#include <iomanip>
 
 void Common::initSolution(int n, mat2i& solution)
 {
@@ -24,7 +25,7 @@ void Common::printMatrix(const mat2i& matrix)
     {
         for (auto t : r)
         {
-            std::cout << t << " ";
+            std::cout << std::setw(2) << std::setfill('0') << t << " ";
         }
         std::cout << std::endl;
     }
