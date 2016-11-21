@@ -35,7 +35,7 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data8.txt");
+    testLNS<Factorization>("instances/data10.txt");
 //    test<CPSolver>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");
 //    test<DFSStar>("instances/data4.txt");

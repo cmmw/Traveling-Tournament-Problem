@@ -20,10 +20,10 @@
 LNS::LNS(const mat2i& distance) :
         m_distance(distance)
 {
-//    m_destroyMethods.push_back(new DestroyRounds(distance));
-//    m_destroyMethods.push_back(new DestroyTeams(distance));
+    m_destroyMethods.push_back(new DestroyRounds(distance));
+    m_destroyMethods.push_back(new DestroyTeams(distance));
     m_destroyMethods.push_back(new DestroyHomes(distance));
-//    m_destroyMethods.push_back(new DestroyRandom(distance));
+    m_destroyMethods.push_back(new DestroyRandom(distance));
 
     m_repairMethods.push_back(new CPSolver(distance));
 //    m_repairMethods.push_back(new DFSStar(distance));
@@ -65,7 +65,7 @@ mat2i LNS::solve(const mat2i& solution)
             i = 0;
         }
 
-        if (i == 100)
+        if (i == 1000)
             done = true;
         i++;
     }

@@ -13,7 +13,7 @@
 #include <iostream>
 
 CPSolver::CPSolver(const mat2i& distance) :
-        IRepair(distance), m_useMRV(false), m_useLCV(false), m_nodes(0), m_optimal(false), m_bestValue(0)
+        IRepair(distance), m_useMRV(true), m_useLCV(true), m_nodes(0), m_optimal(false), m_bestValue(0)
 {
 }
 
@@ -57,11 +57,11 @@ bool CPSolver::backTrack(mat2i& solution)
         }
     }
 
-    std::vector<int> domainCpy = m_domain[team][round];
+    std::vector<int> domain = m_domain[team][round];
     if (m_useLCV)
     {
         std::map<int, int> ruledOut;
-        std::vector<int>& values = domainCpy;
+        std::vector<int>& values = domain;
         for (unsigned int i = 0; i < values.size(); i++)
         {
             ruledOut[values[i]] = ruledOutValues(team, round, values[i], solution);
@@ -71,24 +71,28 @@ bool CPSolver::backTrack(mat2i& solution)
         {   return ruledOut[val1] < ruledOut[val2];});
     }
 
-    for (auto d : domainCpy)
+    for (auto d : domain)
     {
         m_nodes++;
         std::vector<DomainBackupEntry> domainBackup;
         solution[team][round] = d;
+        bool setOpponent = solution[std::abs(d) - 1][round] == 0;
+        if (setOpponent)
+        {
+            if (d < 0)
+                solution[-d - 1][round] = (team + 1);
+            else
+                solution[d - 1][round] = -(team + 1);
+        }
 
-        if (d < 0)
-            solution[-d - 1][round] = (team + 1);
-        else
-            solution[d - 1][round] = -(team + 1);
-
-        if (forwardCheck(team, round, solution, domainBackup) && forwardCheck(std::abs(d) - 1, round, solution, domainBackup))
+        if (forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
         {
             if (backTrack(solution))
                 return true;
         }
 
-        solution[std::abs(d) - 1][round] = 0;
+        if (setOpponent)
+            solution[std::abs(d) - 1][round] = 0;
         for (auto& b : domainBackup)
         {
             m_domain[b.m_team][b.m_round] = b.m_backup;
