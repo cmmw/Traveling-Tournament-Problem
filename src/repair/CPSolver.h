@@ -8,10 +8,11 @@
 #ifndef CPSOLVER_H_
 #define CPSOLVER_H_
 
+#include "IRepair.h"
 #include "../Common.h"
 #include <vector>
 
-class CPSolver
+class CPSolver: public IRepair
 {
 public:
     bool m_useMRV;
@@ -20,19 +21,14 @@ public:
     CPSolver(const mat2i& distance);
     virtual ~CPSolver();
 
-    bool solve(mat2i& solution, bool optimal = false);
+    mat2i solve(const mat2i& solution, bool optimal = false);
 
 private:
-    int m_teams;
-    int m_rounds;
     int m_nodes;
     bool m_optimal;
     int m_bestValue;
-    mat2i m_distance;
     mat2i m_bestSolution;
-    mat3i m_domain;
 
-    void init(mat2i& solution);
     bool backTrack(mat2i& solution);
     bool getUnassignedVar(int& team, int& round, const mat2i& solution);
     bool getNextUnassignedVar(int& team, int& round, const mat2i& solution);

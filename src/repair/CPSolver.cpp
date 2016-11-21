@@ -13,7 +13,7 @@
 #include <iostream>
 
 CPSolver::CPSolver(const mat2i& distance) :
-        m_useMRV(true), m_useLCV(true), m_teams(distance.size()), m_rounds(2 * m_teams - 2), m_nodes(0), m_optimal(false), m_bestValue(0), m_distance(distance)
+        IRepair(distance), m_useMRV(true), m_useLCV(true), m_nodes(0), m_optimal(false), m_bestValue(0)
 {
 }
 
@@ -21,62 +21,17 @@ CPSolver::~CPSolver()
 {
 }
 
-bool CPSolver::solve(mat2i& solution, bool optimal)
+mat2i CPSolver::solve(const mat2i& solution, bool optimal)
 {
+    mat2i sol = solution;
     m_optimal = optimal;
     m_bestValue = std::numeric_limits<int>::max();
-    init(solution);
+    init(sol);
     m_nodes = 0;
-    backTrack(solution);
-    solution = m_bestSolution;
+    backTrack(sol);
+    sol = m_bestSolution;
 //    std::cout << "searched nodes: " << m_nodes << std::endl;
-    return !solution.empty();
-}
-
-void CPSolver::init(mat2i& solution)
-{
-    std::vector<int> initDomain;
-    m_domain.clear();
-    for (int i = -m_teams; i < 0; i++)
-    {
-        initDomain.push_back(i);
-        initDomain.push_back(-i);
-    }
-
-    for (int t = 0; t < m_teams; t++)
-    {
-        m_domain.push_back(mat2i());
-        for (int r = 0; r < m_rounds; r++)
-        {
-            m_domain[t].push_back(initDomain);
-
-            //A team cannot play against itself in any round
-            m_domain[t][r].erase(std::remove(m_domain[t][r].begin(), m_domain[t][r].end(), t + 1), m_domain[t][r].end());
-            m_domain[t][r].erase(std::remove(m_domain[t][r].begin(), m_domain[t][r].end(), -(t + 1)), m_domain[t][r].end());
-        }
-    }
-
-    if (solution.empty())
-    {
-        Common::initSolution(m_teams, solution);
-    } else
-    {
-        for (int t = 0; t < m_teams; t++)
-        {
-            for (int r = 0; r < m_rounds; r++)
-            {
-                if (solution[t][r] != 0)
-                {
-                    std::vector<Common::DomainBackupEntry> domainBackup;
-                    if (!Common::forwardCheck(t, r, solution, m_domain, domainBackup))
-                    {
-                        std::cerr << "Inconsistent solution" << std::endl;
-                        exit(1);
-                    }
-                }
-            }
-        }
-    }
+    return sol;
 }
 
 bool CPSolver::backTrack(mat2i& solution)
@@ -117,7 +72,7 @@ bool CPSolver::backTrack(mat2i& solution)
     for (auto d : m_domain[team][round])
     {
         m_nodes++;
-        std::vector<Common::DomainBackupEntry> domainBackup;
+        std::vector<DomainBackupEntry> domainBackup;
         solution[team][round] = d;
 
         if (d < 0)
@@ -125,7 +80,7 @@ bool CPSolver::backTrack(mat2i& solution)
         else
             solution[d - 1][round] = -(team + 1);
 
-        if (Common::forwardCheck(team, round, solution, m_domain, domainBackup) && Common::forwardCheck(std::abs(d) - 1, round, solution, m_domain, domainBackup))
+        if (forwardCheck(team, round, solution, domainBackup) && forwardCheck(std::abs(d) - 1, round, solution, domainBackup))
         {
             if (backTrack(solution))
                 return true;

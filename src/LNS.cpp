@@ -88,10 +88,8 @@ mat2i LNS::destroy(const mat2i& solution, int method)
 
 mat2i LNS::repair(const mat2i& solution)
 {
-    mat2i repaired = solution;
     CPSolver solver(m_distance);
-    solver.solve(repaired, true);
-    return repaired;
+    return solver.solve(solution, true);
 }
 
 bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)
