@@ -7,6 +7,7 @@
 
 #include "LNS.h"
 #include "repair/CPSolver.h"
+#include "repair/DFSStar.h"
 #include "destroy/DestroyHomes.h"
 #include "destroy/DestroyRandom.h"
 #include "destroy/DestroyRounds.h"
@@ -23,6 +24,9 @@ LNS::LNS(const mat2i& distance) :
     m_destroyMethods.push_back(new DestroyTeams(distance));
     m_destroyMethods.push_back(new DestroyHomes(distance));
     m_destroyMethods.push_back(new DestroyRandom(distance));
+
+    m_repairMethods.push_back(new CPSolver(distance));
+//    m_repairMethods.push_back(new DFSStar(distance));
 
     m_methodImproved.resize(m_destroyMethods.size());
     m_usedMethods.resize(m_destroyMethods.size());
@@ -45,8 +49,9 @@ mat2i LNS::solve(const mat2i& solution)
     int i = 0;
     while (!done)
     {
-        int method = rand() % m_destroyMethods.size();
-        mat2i tempSol = repair(destroy(curSol, method));
+        int destroyMethod = rand() % m_destroyMethods.size();
+        int repairMethod = rand() % m_repairMethods.size();
+        mat2i tempSol = repair(destroy(curSol, destroyMethod), repairMethod);
 
         if (accept(tempSol, curSol))
         {
@@ -56,7 +61,7 @@ mat2i LNS::solve(const mat2i& solution)
         {
             bestSol = tempSol;
             std::cout << Common::eval(bestSol, m_distance) << std::endl;
-            m_methodImproved[method]++;
+            m_methodImproved[destroyMethod]++;
             i = 0;
         }
 
@@ -86,10 +91,9 @@ mat2i LNS::destroy(const mat2i& solution, int method)
     return m_destroyMethods[method]->destroy(solution);
 }
 
-mat2i LNS::repair(const mat2i& solution)
+mat2i LNS::repair(const mat2i& solution, int method)
 {
-    CPSolver solver(m_distance);
-    return solver.solve(solution, true);
+    return m_repairMethods[method]->solve(solution, true);
 }
 
 bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)

@@ -9,8 +9,6 @@
 #define CPSOLVER_H_
 
 #include "IRepair.h"
-#include "../Common.h"
-#include <vector>
 
 class CPSolver: public IRepair
 {

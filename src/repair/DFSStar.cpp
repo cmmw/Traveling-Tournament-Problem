@@ -7,14 +7,25 @@
 
 #include "DFSStar.h"
 
-DFSStar::DFSStar()
+DFSStar::DFSStar(const mat2i& distance) :
+        IRepair(distance), m_nodes(0)
 {
-    // TODO Auto-generated constructor stub
-
 }
 
 DFSStar::~DFSStar()
 {
-    // TODO Auto-generated destructor stub
 }
 
+mat2i DFSStar::solve(const mat2i& solution, bool optimal)
+{
+    mat2i sol = solution;
+    init(sol);
+    m_nodes = 0;
+    backTrack(sol, 0);
+    return sol;
+}
+
+bool DFSStar::backTrack(mat2i& solution, int i)
+{
+
+}

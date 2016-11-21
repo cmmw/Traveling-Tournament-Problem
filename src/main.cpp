@@ -24,6 +24,8 @@ template<class T>
 void benchmark();
 template<class T>
 void testLNS(const char* instance);
+template<class T>
+mat2i callSolver(T& solver);
 
 const char* instances[] =
         { "instances/data8.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
@@ -33,8 +35,8 @@ int main()
     srand(time(nullptr));
 
     testLNS<Factorization>("instances/data10.txt");
-//    test<CPSolver>("instances/data6.txt");
-//    test<Factorization>("instances/data8.txt");
+//    test<CPSolver>("instances/data10.txt");
+//    test<Factorization>("instances/data10.txt");
 //    benchmark<CPSolver>();
 //    benchmark<Factorization>();
     return 0;
@@ -80,11 +82,10 @@ void test(const char* instance)
 
     auto start = std::chrono::high_resolution_clock::now();
     T solver(distance);
-    mat2i solution;
-    bool found = solver.solve(solution);
+    mat2i solution = callSolver<T>(solver);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    if (found)
+    if (!solution.empty())
     {
         Common::printMatrix(solution);
     } else
@@ -105,13 +106,12 @@ void benchmark()
         if (distance.empty())
             break;
         T solver(distance);
-        mat2i solution;
         auto start = std::chrono::high_resolution_clock::now();
-        bool found = solver.solve(solution);
+        mat2i solution = callSolver<T>(solver);
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         std::cout << instance << ": " << duration << "ms, ";
-        if (found)
+        if (!solution.empty())
             std::cout << Common::eval(solution, distance) << std::endl;
         else
             std::cout << "no solution found" << std::endl;
@@ -135,4 +135,19 @@ void testLNS(const char* instance)
     Common::printMatrix(solution);
     std::cout << instance << ": " << duration << "ms, ";
     std::cout << Common::eval(solution, distance) << std::endl;
+}
+
+template<class T>
+mat2i callSolver(T& solver)
+{
+    mat2i solution;
+    return solver.solve(solution);
+}
+
+template<>
+mat2i callSolver(Factorization& solver)
+{
+    mat2i solution;
+    solver.solve(solution);
+    return solution;
 }
