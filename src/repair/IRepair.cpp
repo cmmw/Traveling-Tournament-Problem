@@ -51,7 +51,8 @@ void IRepair::init(mat2i& solution)
                     std::vector<DomainBackupEntry> domainBackup;
                     if (!forwardCheck(t, r, solution, domainBackup))
                     {
-                        std::cerr << "Inconsistent solution" << std::endl;
+                        std::cerr << "Inconsistent solution:" << std::endl;
+                        Common::printMatrix(solution);
                         exit(1);
                     }
                 }
