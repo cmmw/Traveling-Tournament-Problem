@@ -24,10 +24,10 @@ void NNRepair::solve(const mat2i& solution)
     //TODO LDS!!!
     mat2i sol = solution;
     init(sol);
-    backTrack(sol);
+    backTrack(sol, 5);
 }
 
-bool NNRepair::backTrack(mat2i& solution)
+bool NNRepair::backTrack(mat2i& solution, int lds)
 {
     int team, round;
     if (!getNextVariable(team, round, solution))
@@ -63,8 +63,13 @@ bool NNRepair::backTrack(mat2i& solution)
         }
     });
 
+    int i = 0;
     for (auto d : domain)
     {
+        //if i = 0 we follow the heuristic. only a number of lds choices allowed to not follow the heuristic
+        if (i != 0 && lds == 0)
+            break;
+
         std::vector<DomainBackupEntry> domainBackup;
         solution[team][round] = d;
         bool setOpponent = solution[std::abs(d) - 1][round] == 0;
@@ -78,7 +83,7 @@ bool NNRepair::backTrack(mat2i& solution)
 
         if (forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
         {
-            if (backTrack(solution))
+            if (backTrack(solution, (i == 0) ? lds : lds - 1))
                 return true;
         }
 
@@ -88,6 +93,7 @@ bool NNRepair::backTrack(mat2i& solution)
         {
             m_domain[b.m_team][b.m_round] = b.m_backup;
         }
+        i++;
     }
     solution[team][round] = 0;
     return false;
