@@ -7,7 +7,6 @@
 
 #include "LNS.h"
 #include "repair/CPSolver.h"
-#include "repair/DFSStar.h"
 #include "repair/NNRepair.h"
 #include "destroy/DestroyHomes.h"
 #include "destroy/DestroyRandom.h"
@@ -27,7 +26,6 @@ LNS::LNS(const mat2i& distance) :
     m_destroyMethods.push_back(new DestroyRandom(distance));
 
 //    m_repairMethods.push_back(new CPSolver(distance));
-//    m_repairMethods.push_back(new DFSStar(distance));
     m_repairMethods.push_back(new NNRepair(distance));
 
     m_methodImproved.resize(m_destroyMethods.size());
