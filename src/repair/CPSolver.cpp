@@ -13,7 +13,7 @@
 #include <iostream>
 
 CPSolver::CPSolver(const mat2i& distance) :
-        IRepair(distance), m_useMRV(true), m_useLCV(true), m_nodes(0), m_optimal(false), m_bestValue(0)
+        IRepair(distance), m_useMRV(true), m_useLCV(true), m_nodes(0)
 {
 }
 
@@ -21,18 +21,12 @@ CPSolver::~CPSolver()
 {
 }
 
-mat2i CPSolver::solve(const mat2i& solution, bool optimal)
+void CPSolver::solve(const mat2i& solution)
 {
     mat2i sol = solution;
-    m_optimal = optimal;
-    m_bestValue = std::numeric_limits<int>::max();
     init(sol);
     m_nodes = 0;
-    m_bestSolution.clear();
     backTrack(sol);
-    sol = m_bestSolution;
-//    std::cout << "searched nodes: " << m_nodes << std::endl;
-    return sol;
 }
 
 bool CPSolver::backTrack(mat2i& solution)
@@ -66,7 +60,6 @@ bool CPSolver::backTrack(mat2i& solution)
         {
             ruledOut[values[i]] = ruledOutValues(team, round, values[i], solution);
         }
-//            std::random_shuffle(values.begin(), values.end());
         std::sort(values.begin(), values.end(), [&](int val1, int val2)
         {   return ruledOut[val1] < ruledOut[val2];});
     }

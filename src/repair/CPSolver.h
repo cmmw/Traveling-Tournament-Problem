@@ -19,14 +19,10 @@ public:
     CPSolver(const mat2i& distance);
     virtual ~CPSolver();
 
-    mat2i solve(const mat2i& solution, bool optimal = false);
-
 private:
     int m_nodes;
-    bool m_optimal;
-    int m_bestValue;
-    mat2i m_bestSolution;
 
+    void solve(const mat2i& solution);
     bool backTrack(mat2i& solution);
     bool getUnassignedVar(int& team, int& round, const mat2i& solution);
     bool getNextUnassignedVar(int& team, int& round, const mat2i& solution);

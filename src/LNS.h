@@ -21,6 +21,7 @@ public:
     mat2i solve(const mat2i& solution);
 
 private:
+    int m_upperBound;
     mat2i m_distance;
     std::vector<int> m_usedMethods;
     std::vector<int> m_methodImproved;

@@ -8,6 +8,7 @@
 #include "LNS.h"
 #include "repair/CPSolver.h"
 #include "repair/DFSStar.h"
+#include "repair/NNRepair.h"
 #include "destroy/DestroyHomes.h"
 #include "destroy/DestroyRandom.h"
 #include "destroy/DestroyRounds.h"
@@ -18,15 +19,16 @@
 #include <typeindex>
 
 LNS::LNS(const mat2i& distance) :
-        m_distance(distance)
+        m_upperBound(std::numeric_limits<int>::max()), m_distance(distance)
 {
     m_destroyMethods.push_back(new DestroyRounds(distance));
     m_destroyMethods.push_back(new DestroyTeams(distance));
     m_destroyMethods.push_back(new DestroyHomes(distance));
     m_destroyMethods.push_back(new DestroyRandom(distance));
 
-    m_repairMethods.push_back(new CPSolver(distance));
+//    m_repairMethods.push_back(new CPSolver(distance));
 //    m_repairMethods.push_back(new DFSStar(distance));
+    m_repairMethods.push_back(new NNRepair(distance));
 
     m_methodImproved.resize(m_destroyMethods.size());
     m_usedMethods.resize(m_destroyMethods.size());
@@ -42,6 +44,7 @@ LNS::~LNS()
 
 mat2i LNS::solve(const mat2i& solution)
 {
+    m_upperBound = Common::eval(solution, m_distance);
     Common::printMatrix(solution);
     mat2i bestSol = solution;
     mat2i curSol = solution;
@@ -53,13 +56,14 @@ mat2i LNS::solve(const mat2i& solution)
         int repairMethod = rand() % m_repairMethods.size();
         mat2i tempSol = repair(destroy(curSol, destroyMethod), repairMethod);
 
-        if (accept(tempSol, curSol))
+        if (!tempSol.empty() && accept(tempSol, curSol))
         {
             curSol = tempSol;
         }
-        if (Common::eval(tempSol, m_distance) < Common::eval(bestSol, m_distance))
+        if (!tempSol.empty() && Common::eval(tempSol, m_distance) < m_upperBound)
         {
             bestSol = tempSol;
+            m_upperBound = Common::eval(tempSol, m_distance);
             std::cout << Common::eval(bestSol, m_distance) << std::endl;
             m_methodImproved[destroyMethod]++;
             i = 0;
@@ -93,7 +97,7 @@ mat2i LNS::destroy(const mat2i& solution, int method)
 
 mat2i LNS::repair(const mat2i& solution, int method)
 {
-    return m_repairMethods[method]->solve(solution, true);
+    return m_repairMethods[method]->solve(solution, true, m_upperBound);
 }
 
 bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)

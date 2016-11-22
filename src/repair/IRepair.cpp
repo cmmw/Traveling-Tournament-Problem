@@ -10,8 +10,17 @@
 #include <iostream>
 
 IRepair::IRepair(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_optimal(false), m_bestValue(std::numeric_limits<int>::max()), m_distance(distance)
 {
+}
+
+mat2i IRepair::solve(const mat2i& solution, bool optimal, int upperBound)
+{
+    m_optimal = optimal;
+    m_bestSolution.clear();
+    m_bestValue = upperBound;
+    solve(solution);
+    return m_bestSolution;
 }
 
 void IRepair::init(mat2i& solution)
@@ -222,3 +231,4 @@ bool IRepair::contains(int team, int round, const std::vector<DomainBackupEntry>
     }
     return false;
 }
+

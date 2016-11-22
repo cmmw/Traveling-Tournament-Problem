@@ -9,6 +9,7 @@
 #define REPAIR_IREPAIR_H_
 
 #include "../Common.h"
+#include <limits>
 
 class IRepair
 {
@@ -16,11 +17,14 @@ public:
     IRepair(const mat2i& distance);
     virtual ~IRepair() = default;
 
-    virtual mat2i solve(const mat2i& solution, bool optimal = false) = 0;
+    mat2i solve(const mat2i& solution, bool optimal, int upperBound = std::numeric_limits<int>::max());
 
 protected:
     int m_teams;
     int m_rounds;
+    bool m_optimal;
+    int m_bestValue;
+    mat2i m_bestSolution;
     mat2i m_distance;
     mat3i m_domain;
 
@@ -44,6 +48,10 @@ protected:
     void init(mat2i& solution);
     bool forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup);
     bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
+
+private:
+    virtual void solve(const mat2i& solution) = 0;
+
 };
 
 #endif /* REPAIR_IREPAIR_H_ */

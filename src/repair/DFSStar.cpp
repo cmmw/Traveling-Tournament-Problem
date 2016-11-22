@@ -7,10 +7,10 @@
 
 #include "DFSStar.h"
 #include <cmath>
-#include <limits>
+#include <iostream>
 
 DFSStar::DFSStar(const mat2i& distance) :
-        IRepair(distance), m_nodes(0), m_bestValue(std::numeric_limits<int>::max())
+        IRepair(distance)
 {
 }
 
@@ -18,15 +18,11 @@ DFSStar::~DFSStar()
 {
 }
 
-mat2i DFSStar::solve(const mat2i& solution, bool optimal)
+void DFSStar::solve(const mat2i& solution)
 {
     mat2i sol = solution;
     init(sol);
-    m_nodes = 0;
-    m_bestSolution.clear();
-    m_bestValue = std::numeric_limits<int>::max();
     backTrack(sol);
-    return m_bestSolution;
 }
 
 bool DFSStar::backTrack(mat2i& solution)
@@ -46,23 +42,28 @@ bool DFSStar::backTrack(mat2i& solution)
         return false;
     }
 
-    for (auto d : m_domain[team][round])
+    std::vector<int> domain = m_domain[team][round];
+    for (auto d : domain)
     {
-        m_nodes++;
         std::vector<DomainBackupEntry> domainBackup;
         solution[team][round] = d;
+        bool setOpponent = solution[std::abs(d) - 1][round] == 0;
+        if (setOpponent)
+        {
+            if (d < 0)
+                solution[-d - 1][round] = (team + 1);
+            else
+                solution[d - 1][round] = -(team + 1);
+        }
 
-        if (d < 0)
-            solution[-d - 1][round] = (team + 1);
-        else
-            solution[d - 1][round] = -(team + 1);
-
-        if (lowerBound < upperBound && forwardCheck(team, round, solution, domainBackup) && forwardCheck(std::abs(d) - 1, round, solution, domainBackup))
+        if (lowerBound < upperBound && forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
         {
             if (backTrack(solution))
                 return true;
         }
-        solution[std::abs(d) - 1][round] = 0;
+
+        if (setOpponent)
+            solution[std::abs(d) - 1][round] = 0;
         for (auto& b : domainBackup)
         {
             m_domain[b.m_team][b.m_round] = b.m_backup;
