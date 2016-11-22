@@ -8,7 +8,6 @@
 
 #include "LNS.h"
 #include "repair/CPSolver.h"
-#include "repair/DFSStar.h"
 #include "Factorization.h"
 #include "Common.h"
 #include <iostream>
