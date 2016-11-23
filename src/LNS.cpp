@@ -54,17 +54,20 @@ mat2i LNS::solve(const mat2i& solution)
         int repairMethod = rand() % m_repairMethods.size();
         mat2i tempSol = repair(destroy(curSol, destroyMethod), repairMethod);
 
-        if (!tempSol.empty() && accept(tempSol, curSol))
+        if (!tempSol.empty())
         {
-            curSol = tempSol;
-        }
-        if (!tempSol.empty() && Common::eval(tempSol, m_distance) < m_upperBound)
-        {
-            bestSol = tempSol;
-            m_upperBound = Common::eval(tempSol, m_distance);
-            std::cout << Common::eval(bestSol, m_distance) << std::endl;
-            m_methodImproved[destroyMethod]++;
-            i = 0;
+            if (accept(tempSol, curSol))
+            {
+                curSol = tempSol;
+            }
+            if (Common::eval(tempSol, m_distance) < m_upperBound)
+            {
+                bestSol = tempSol;
+                m_upperBound = Common::eval(tempSol, m_distance);
+                std::cout << Common::eval(bestSol, m_distance) << std::endl;
+                m_methodImproved[destroyMethod]++;
+                i = 0;
+            }
         }
 
         if (i == 1000)
@@ -95,7 +98,7 @@ mat2i LNS::destroy(const mat2i& solution, int method)
 
 mat2i LNS::repair(const mat2i& solution, int method)
 {
-    return m_repairMethods[method]->solve(solution, true, m_upperBound);
+    return m_repairMethods[method]->solve(solution, false, m_upperBound);
 }
 
 bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)

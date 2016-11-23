@@ -32,23 +32,24 @@ void CPSolver::solve(const mat2i& solution)
 bool CPSolver::backTrack(mat2i& solution)
 {
     int team, round;
-
     if (!getUnassignedVar(team, round, solution))
     {
-        if (m_optimal)
-        {
-            int value = Common::eval(solution, m_distance);
-            if (value < m_bestValue)
-            {
-                m_bestSolution = solution;
-                m_bestValue = value;
-            }
-            return false;
-        } else
+        int value = Common::eval(solution, m_distance);
+        if (value < m_bestValue)
         {
             m_bestSolution = solution;
-            return true;
+            m_bestValue = value;
+            if (m_optimal)
+                return false;
+            else
+                return true;
         }
+        //Kepp track of the best solution found so far, even if it is not better than the upper bound
+        if (m_bestSolution.empty() || value < Common::eval(m_bestSolution, m_distance))
+        {
+            m_bestSolution = solution;
+        }
+        return false;
     }
 
     std::vector<int> domain = m_domain[team][round];

@@ -21,10 +21,9 @@ NNRepair::~NNRepair()
 
 void NNRepair::solve(const mat2i& solution)
 {
-    //TODO LDS!!!
     mat2i sol = solution;
     init(sol);
-    backTrack(sol, 5);
+    backTrack(sol, 30);
 }
 
 bool NNRepair::backTrack(mat2i& solution, int lds)
@@ -37,7 +36,15 @@ bool NNRepair::backTrack(mat2i& solution, int lds)
         {
             m_bestSolution = solution;
             m_bestValue = value;
-            return true;
+            if (m_optimal)
+                return false;
+            else
+                return true;
+        }
+        //Kepp track of the best solution found so far, even if it is not better than the upper bound
+        if (m_bestSolution.empty() || value < Common::eval(m_bestSolution, m_distance))
+        {
+            m_bestSolution = solution;
         }
         return false;
     }
@@ -101,20 +108,23 @@ bool NNRepair::backTrack(mat2i& solution, int lds)
 
 bool NNRepair::getNextVariable(int& team, int& round, const mat2i& solution)
 {
-    //This heuristic assumes that all games before the current round are set
-    for (int r = 0; r < m_rounds; r++)
+    //This heuristic assumes that all games before the current round are set for the team
+    bool found = false;
+    unsigned int rv = std::numeric_limits<unsigned int>::max();
+    for (int r = 0; r < m_rounds && !found; r++)
     {
         for (int t = 0; t < m_teams; t++)
         {
-            if (solution[t][r] == 0)
+            if (solution[t][r] == 0 && m_domain[t][r].size() < rv)
             {
+                rv = m_domain[t][r].size();
                 team = t;
                 round = r;
-                return true;
+                found = true;
             }
         }
     }
-    return false;
+    return found;
 }
 
 //team with index teamIdx plays against t1 and then t2, calculate travel distance
