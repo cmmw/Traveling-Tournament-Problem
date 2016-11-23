@@ -98,7 +98,7 @@ mat2i LNS::destroy(const mat2i& solution, int method)
 
 mat2i LNS::repair(const mat2i& solution, int method)
 {
-    return m_repairMethods[method]->solve(solution, false, m_upperBound);
+    return m_repairMethods[method]->solve(solution, m_upperBound);
 }
 
 bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)

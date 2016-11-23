@@ -19,11 +19,11 @@ NNRepair::~NNRepair()
 {
 }
 
-void NNRepair::solve(const mat2i& solution)
+void NNRepair::solveImpl(const mat2i& solution)
 {
     mat2i sol = solution;
     init(sol);
-    backTrack(sol, 30);
+    backTrack(sol, 3);
 }
 
 bool NNRepair::backTrack(mat2i& solution, int lds)
@@ -32,20 +32,18 @@ bool NNRepair::backTrack(mat2i& solution, int lds)
     if (!getNextVariable(team, round, solution))
     {
         int value = Common::eval(solution, m_distance);
-        if (value < m_bestValue)
+        if (value < m_upperBound)
         {
             m_bestSolution = solution;
-            m_bestValue = value;
-            if (m_optimal)
-                return false;
-            else
-                return true;
+            return true;
         }
         //Kepp track of the best solution found so far, even if it is not better than the upper bound
-        if (m_bestSolution.empty() || value < Common::eval(m_bestSolution, m_distance))
+        if (m_bestSolution.empty() || value < m_bestSolutionValue)
         {
             m_bestSolution = solution;
+            m_bestSolutionValue = value;
         }
+
         return false;
     }
 

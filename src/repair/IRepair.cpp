@@ -10,16 +10,15 @@
 #include <iostream>
 
 IRepair::IRepair(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_optimal(false), m_bestValue(std::numeric_limits<int>::max()), m_distance(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_upperBound(std::numeric_limits<int>::max()), m_bestSolutionValue(std::numeric_limits<int>::max()), m_distance(distance)
 {
 }
 
-mat2i IRepair::solve(const mat2i& solution, bool optimal, int upperBound)
+mat2i IRepair::solve(const mat2i& solution, int upperBound)
 {
-    m_optimal = optimal;
     m_bestSolution.clear();
-    m_bestValue = upperBound;
-    solve(solution);
+    m_upperBound = upperBound;
+    solveImpl(solution);
     return m_bestSolution;
 }
 

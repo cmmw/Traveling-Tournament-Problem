@@ -17,13 +17,13 @@ public:
     IRepair(const mat2i& distance);
     virtual ~IRepair() = default;
 
-    mat2i solve(const mat2i& solution, bool optimal, int upperBound = std::numeric_limits<int>::max());
+    mat2i solve(const mat2i& solution, int upperBound = std::numeric_limits<int>::max());
 
 protected:
     int m_teams;
     int m_rounds;
-    bool m_optimal;
-    int m_bestValue;
+    int m_upperBound;
+    int m_bestSolutionValue;
     mat2i m_bestSolution;
     mat2i m_distance;
     mat3i m_domain;
@@ -50,7 +50,7 @@ protected:
     bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
 
 private:
-    virtual void solve(const mat2i& solution) = 0;
+    virtual void solveImpl(const mat2i& solution) = 0;
 
 };
 

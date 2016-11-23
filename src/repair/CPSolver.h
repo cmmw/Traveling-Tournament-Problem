@@ -22,7 +22,7 @@ public:
 private:
     int m_nodes;
 
-    void solve(const mat2i& solution);
+    void solveImpl(const mat2i& solution);
     bool backTrack(mat2i& solution);
     bool getUnassignedVar(int& team, int& round, const mat2i& solution);
     bool getNextUnassignedVar(int& team, int& round, const mat2i& solution);
