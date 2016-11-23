@@ -65,9 +65,10 @@ mat2i IRepair::solve(const mat2i& solution, int upperBound)
 {
     m_bestSolution.clear();
     m_upperBound = upperBound;
+    m_bestSolutionValue = std::numeric_limits<int>::max();
     mat2i sol = solution;
     init(sol);
-    backTrack(sol, 50);
+    backTrack(sol, 5);
     return m_bestSolution;
 }
 
