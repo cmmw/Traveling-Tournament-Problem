@@ -25,11 +25,13 @@ LNS::LNS(const mat2i& distance) :
     m_destroyMethods.push_back(new DestroyHomes(distance));
     m_destroyMethods.push_back(new DestroyRandom(distance));
 
-//    m_repairMethods.push_back(new CPSolver(distance));
+    m_repairMethods.push_back(new CSPRepair(distance));
     m_repairMethods.push_back(new NNRepair(distance));
 
-    m_methodImproved.resize(m_destroyMethods.size());
-    m_usedMethods.resize(m_destroyMethods.size());
+    m_usedRepairMethods.resize(m_repairMethods.size());
+    m_usedDestroyMethods.resize(m_destroyMethods.size());
+    m_repairMethodImproved.resize(m_repairMethods.size());
+    m_destroyMethodImproved.resize(m_destroyMethods.size());
 }
 
 LNS::~LNS()
@@ -63,7 +65,8 @@ mat2i LNS::solve(const mat2i& solution)
                 bestSol = tempSol;
                 m_upperBound = Common::eval(tempSol, m_distance);
                 std::cout << Common::eval(bestSol, m_distance) << std::endl;
-                m_methodImproved[destroyMethod]++;
+                m_repairMethodImproved[repairMethod]++;
+                m_destroyMethodImproved[destroyMethod]++;
                 i = 0;
             }
         }
@@ -72,30 +75,20 @@ mat2i LNS::solve(const mat2i& solution)
             done = true;
         i++;
     }
-    std::cout << "Methods used:" << std::endl;
-    for (unsigned int i = 0; i < m_usedMethods.size(); i++)
-    {
-        std::cout << typeid(*m_destroyMethods[i]).name() << ": " << m_usedMethods[i] << ", ";
-    }
-    std::cout << std::endl;
-    std::cout << "Methods improved solution:" << std::endl;
-    for (unsigned int i = 0; i < m_methodImproved.size(); i++)
-    {
-        std::cout << typeid(*m_destroyMethods[i]).name() << ": " << m_methodImproved[i] << ", ";
-    }
-    std::cout << std::endl;
+    printStatistics();
     return bestSol;
 }
 
 mat2i LNS::destroy(const mat2i& solution, int method)
 {
-    m_usedMethods[method]++;
+    m_usedDestroyMethods[method]++;
     std::cout << typeid(*m_destroyMethods[method]).name() << std::endl;
     return m_destroyMethods[method]->destroy(solution);
 }
 
 mat2i LNS::repair(const mat2i& solution, int method)
 {
+    m_usedRepairMethods[method]++;
     return m_repairMethods[method]->solve(solution, m_upperBound);
 }
 
@@ -106,4 +99,32 @@ bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)
     if (newVal < oldVal)
         return true;
     return false;
+}
+
+void LNS::printStatistics()
+{
+    std::cout << "Repair-methods used:" << std::endl;
+    for (unsigned int i = 0; i < m_usedRepairMethods.size(); i++)
+    {
+        std::cout << typeid(*m_repairMethods[i]).name() << ": " << m_usedRepairMethods[i] << ", ";
+    }
+    std::cout << std::endl;
+    std::cout << "Destroy-methods used:" << std::endl;
+    for (unsigned int i = 0; i < m_usedDestroyMethods.size(); i++)
+    {
+        std::cout << typeid(*m_destroyMethods[i]).name() << ": " << m_usedDestroyMethods[i] << ", ";
+    }
+    std::cout << std::endl;
+    std::cout << "Repair-methods improved solution:" << std::endl;
+    for (unsigned int i = 0; i < m_repairMethodImproved.size(); i++)
+    {
+        std::cout << typeid(*m_repairMethods[i]).name() << ": " << m_repairMethodImproved[i] << ", ";
+    }
+    std::cout << std::endl;
+    std::cout << "Destroy-methods improved solution:" << std::endl;
+    for (unsigned int i = 0; i < m_destroyMethodImproved.size(); i++)
+    {
+        std::cout << typeid(*m_destroyMethods[i]).name() << ": " << m_destroyMethodImproved[i] << ", ";
+    }
+    std::cout << std::endl;
 }

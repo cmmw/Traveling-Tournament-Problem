@@ -23,13 +23,17 @@ public:
 private:
     int m_upperBound;
     mat2i m_distance;
-    std::vector<int> m_usedMethods;
-    std::vector<int> m_methodImproved;
+    std::vector<int> m_usedRepairMethods;
+    std::vector<int> m_usedDestroyMethods;
+    std::vector<int> m_repairMethodImproved;
+    std::vector<int> m_destroyMethodImproved;
     std::vector<IRepair*> m_repairMethods;
     std::vector<IDestroy*> m_destroyMethods;
     mat2i destroy(const mat2i& solution, int method);
     mat2i repair(const mat2i& solution, int method);
     bool accept(const mat2i& newSol, const mat2i& oldSol);
+
+    void printStatistics();
 };
 
 #endif /* LNS_H_ */
