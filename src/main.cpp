@@ -28,6 +28,8 @@ void testLNS(const char* instance);
 template<class T>
 mat2i callSolver(T& solver);
 
+//TODO: 1. LDS korrekt implementieren, 2. destroy methoden ausimplementieren, 3. parameter für LDS berechnen/zeit die in repair methode investiert wird
+
 const char* instances[] =
         { "instances/data8.txt", "instances/data10.txt", "instances/data12.txt", "instances/data14.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
 
@@ -35,7 +37,7 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data6.txt");
+    testLNS<Factorization>("instances/data8.txt");
 //    test<CSPRepair>("instances/data12.txt");
 //    test<NNRepair>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");

@@ -68,7 +68,8 @@ mat2i IRepair::solve(const mat2i& solution, int upperBound)
     m_bestSolutionValue = std::numeric_limits<int>::max();
     mat2i sol = solution;
     init(sol);
-    backTrack(sol, 5);
+    //TODO implement LDS: first iteration 0 discrepancies, second iteration 1 discrepancy etc. etc.
+    backTrack(sol, 8);
     return m_bestSolution;
 }
 
