@@ -35,9 +35,7 @@ LNS::LNS(const mat2i& distance) :
 LNS::~LNS()
 {
     for (IDestroy* method : m_destroyMethods)
-    {
         delete method;
-    }
 }
 
 mat2i LNS::solve(const mat2i& solution)
@@ -70,7 +68,7 @@ mat2i LNS::solve(const mat2i& solution)
             }
         }
 
-        if (i == 1000)
+        if (i == 100)
             done = true;
         i++;
     }

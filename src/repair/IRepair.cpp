@@ -14,14 +14,6 @@ IRepair::IRepair(const mat2i& distance) :
 {
 }
 
-mat2i IRepair::solve(const mat2i& solution, int upperBound)
-{
-    m_bestSolution.clear();
-    m_upperBound = upperBound;
-    solveImpl(solution);
-    return m_bestSolution;
-}
-
 void IRepair::init(mat2i& solution)
 {
     std::vector<int> initDomain;
@@ -67,6 +59,74 @@ void IRepair::init(mat2i& solution)
             }
         }
     }
+}
+
+mat2i IRepair::solve(const mat2i& solution, int upperBound)
+{
+    m_bestSolution.clear();
+    m_upperBound = upperBound;
+    mat2i sol = solution;
+    init(sol);
+    backTrack(sol, 50);
+    return m_bestSolution;
+}
+
+bool IRepair::backTrack(mat2i& solution, int lds)
+{
+    int team, round;
+    if (!getNextVariable(team, round, solution))
+    {
+        int value = Common::eval(solution, m_distance);
+        if (value < m_upperBound)
+        {
+            m_bestSolution = solution;
+            return true;
+        }
+        //Kepp track of the best solution found so far, even if it is not better than the upper bound
+        if (m_bestSolution.empty() || value < m_bestSolutionValue)
+        {
+            m_bestSolution = solution;
+            m_bestSolutionValue = value;
+        }
+        return false;
+    }
+
+    std::vector<int> domain = valueOrderHeuristic(solution, team, round);
+
+    int i = 0;
+    for (auto d : domain)
+    {
+        //if i = 0 we follow the heuristic. only a number of lds choices allowed to not follow the heuristic
+        if (i != 0 && lds == 0)
+            break;
+
+        std::vector<DomainBackupEntry> domainBackup;
+        solution[team][round] = d;
+        bool setOpponent = solution[std::abs(d) - 1][round] == 0;
+        if (setOpponent)
+        {
+            if (d < 0)
+                solution[-d - 1][round] = (team + 1);
+            else
+                solution[d - 1][round] = -(team + 1);
+        }
+
+        if (forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
+        {
+            if (backTrack(solution, (i == 0) ? lds : lds - 1))
+                return true;
+        }
+
+        if (setOpponent)
+            solution[std::abs(d) - 1][round] = 0;
+        for (auto& b : domainBackup)
+        {
+            m_domain[b.m_team][b.m_round] = b.m_backup;
+        }
+        i++;
+    }
+    solution[team][round] = 0;
+    return false;
 }
 
 bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup)

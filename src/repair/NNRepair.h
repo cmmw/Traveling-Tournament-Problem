@@ -18,9 +18,8 @@ public:
     virtual ~NNRepair();
 
 private:
-    void solveImpl(const mat2i& solution);
-    bool backTrack(mat2i& solution, int lds);
     bool getNextVariable(int& team, int& round, const mat2i& solution);
+    std::vector<int> valueOrderHeuristic(const mat2i& solution, int team, int round);
     int getDistance(int team, int t1, int t2);
 };
 

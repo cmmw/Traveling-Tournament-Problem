@@ -20,11 +20,11 @@ public:
     virtual ~CPSolver();
 
 private:
-    int m_nodes;
-
     void solveImpl(const mat2i& solution);
     bool backTrack(mat2i& solution);
-    bool getUnassignedVar(int& team, int& round, const mat2i& solution);
+
+    bool getNextVariable(int& team, int& round, const mat2i& solution);
+    std::vector<int> valueOrderHeuristic(const mat2i& solution, int team, int round);
     bool getNextUnassignedVar(int& team, int& round, const mat2i& solution);
     bool getMRV(int& team, int& round, const mat2i& solution);
 

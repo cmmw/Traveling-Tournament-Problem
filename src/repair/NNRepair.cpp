@@ -19,34 +19,29 @@ NNRepair::~NNRepair()
 {
 }
 
-void NNRepair::solveImpl(const mat2i& solution)
+bool NNRepair::getNextVariable(int& team, int& round, const mat2i& solution)
 {
-    mat2i sol = solution;
-    init(sol);
-    backTrack(sol, 3);
+    //This heuristic assumes that all games before the current round are set for the team
+    bool found = false;
+    unsigned int rv = std::numeric_limits<unsigned int>::max();
+    for (int r = 0; r < m_rounds && !found; r++)
+    {
+        for (int t = 0; t < m_teams; t++)
+        {
+            if (solution[t][r] == 0 && m_domain[t][r].size() < rv)
+            {
+                rv = m_domain[t][r].size();
+                team = t;
+                round = r;
+                found = true;
+            }
+        }
+    }
+    return found;
 }
 
-bool NNRepair::backTrack(mat2i& solution, int lds)
+std::vector<int> NNRepair::valueOrderHeuristic(const mat2i& solution, int team, int round)
 {
-    int team, round;
-    if (!getNextVariable(team, round, solution))
-    {
-        int value = Common::eval(solution, m_distance);
-        if (value < m_upperBound)
-        {
-            m_bestSolution = solution;
-            return true;
-        }
-        //Kepp track of the best solution found so far, even if it is not better than the upper bound
-        if (m_bestSolution.empty() || value < m_bestSolutionValue)
-        {
-            m_bestSolution = solution;
-            m_bestSolutionValue = value;
-        }
-
-        return false;
-    }
-
     std::vector<int> domain = m_domain[team][round];
     std::sort(domain.begin(), domain.end(), [&] (int v1, int v2)
     {
@@ -67,62 +62,7 @@ bool NNRepair::backTrack(mat2i& solution, int lds)
             return dist1 < dist2;
         }
     });
-
-    int i = 0;
-    for (auto d : domain)
-    {
-        //if i = 0 we follow the heuristic. only a number of lds choices allowed to not follow the heuristic
-        if (i != 0 && lds == 0)
-            break;
-
-        std::vector<DomainBackupEntry> domainBackup;
-        solution[team][round] = d;
-        bool setOpponent = solution[std::abs(d) - 1][round] == 0;
-        if (setOpponent)
-        {
-            if (d < 0)
-                solution[-d - 1][round] = (team + 1);
-            else
-                solution[d - 1][round] = -(team + 1);
-        }
-
-        if (forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
-        {
-            if (backTrack(solution, (i == 0) ? lds : lds - 1))
-                return true;
-        }
-
-        if (setOpponent)
-            solution[std::abs(d) - 1][round] = 0;
-        for (auto& b : domainBackup)
-        {
-            m_domain[b.m_team][b.m_round] = b.m_backup;
-        }
-        i++;
-    }
-    solution[team][round] = 0;
-    return false;
-}
-
-bool NNRepair::getNextVariable(int& team, int& round, const mat2i& solution)
-{
-    //This heuristic assumes that all games before the current round are set for the team
-    bool found = false;
-    unsigned int rv = std::numeric_limits<unsigned int>::max();
-    for (int r = 0; r < m_rounds && !found; r++)
-    {
-        for (int t = 0; t < m_teams; t++)
-        {
-            if (solution[t][r] == 0 && m_domain[t][r].size() < rv)
-            {
-                rv = m_domain[t][r].size();
-                team = t;
-                round = r;
-                found = true;
-            }
-        }
-    }
-    return found;
+    return domain;
 }
 
 //team with index teamIdx plays against t1 and then t2, calculate travel distance

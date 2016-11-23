@@ -46,11 +46,12 @@ protected:
     };
 
     void init(mat2i& solution);
+    bool backTrack(mat2i& solution, int lds);
     bool forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup);
     bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
 
-private:
-    virtual void solveImpl(const mat2i& solution) = 0;
+    virtual bool getNextVariable(int& team, int& round, const mat2i& solution) = 0;
+    virtual std::vector<int> valueOrderHeuristic(const mat2i& solution, int team, int round) = 0;
 
 };
 

@@ -13,7 +13,7 @@
 #include <iostream>
 
 CPSolver::CPSolver(const mat2i& distance) :
-        IRepair(distance), m_useMRV(true), m_useLCV(true), m_nodes(0)
+        IRepair(distance), m_useMRV(true), m_useLCV(true)
 {
 }
 
@@ -21,35 +21,19 @@ CPSolver::~CPSolver()
 {
 }
 
-void CPSolver::solveImpl(const mat2i& solution)
+bool CPSolver::getNextVariable(int& team, int& round, const mat2i& solution)
 {
-    mat2i sol = solution;
-    init(sol);
-    m_nodes = 0;
-    backTrack(sol);
+    if (m_useMRV)
+    {
+        return getMRV(team, round, solution);
+    } else
+    {
+        return getNextUnassignedVar(team, round, solution);
+    }
 }
 
-bool CPSolver::backTrack(mat2i& solution)
+std::vector<int> CPSolver::valueOrderHeuristic(const mat2i& solution, int team, int round)
 {
-    int team, round;
-    if (!getUnassignedVar(team, round, solution))
-    {
-        int value = Common::eval(solution, m_distance);
-        if (value < m_upperBound)
-        {
-            m_bestSolution = solution;
-            return true;
-        }
-        //Kepp track of the best solution found so far, even if it is not better than the upper bound
-        if (m_bestSolution.empty() || value < m_bestSolutionValue)
-        {
-            m_bestSolution = solution;
-            m_bestSolutionValue = value;
-        }
-
-        return false;
-    }
-
     std::vector<int> domain = m_domain[team][round];
     if (m_useLCV)
     {
@@ -62,47 +46,7 @@ bool CPSolver::backTrack(mat2i& solution)
         std::sort(values.begin(), values.end(), [&](int val1, int val2)
         {   return ruledOut[val1] < ruledOut[val2];});
     }
-
-    for (auto d : domain)
-    {
-        m_nodes++;
-        std::vector<DomainBackupEntry> domainBackup;
-        solution[team][round] = d;
-        bool setOpponent = solution[std::abs(d) - 1][round] == 0;
-        if (setOpponent)
-        {
-            if (d < 0)
-                solution[-d - 1][round] = (team + 1);
-            else
-                solution[d - 1][round] = -(team + 1);
-        }
-
-        if (forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
-        {
-            if (backTrack(solution))
-                return true;
-        }
-
-        if (setOpponent)
-            solution[std::abs(d) - 1][round] = 0;
-        for (auto& b : domainBackup)
-        {
-            m_domain[b.m_team][b.m_round] = b.m_backup;
-        }
-    }
-    solution[team][round] = 0;
-    return false;
-}
-
-bool CPSolver::getUnassignedVar(int& team, int& round, const mat2i& solution)
-{
-    if (m_useMRV)
-    {
-        return getMRV(team, round, solution);
-    } else
-    {
-        return getNextUnassignedVar(team, round, solution);
-    }
+    return domain;
 }
 
 bool CPSolver::getNextUnassignedVar(int& team, int& round, const mat2i& solution)
