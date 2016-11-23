@@ -17,10 +17,6 @@ CPSolver::CPSolver(const mat2i& distance) :
 {
 }
 
-CPSolver::~CPSolver()
-{
-}
-
 bool CPSolver::getNextVariable(int& team, int& round, const mat2i& solution)
 {
     if (m_useMRV)

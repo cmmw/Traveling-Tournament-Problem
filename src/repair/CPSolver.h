@@ -17,7 +17,7 @@ public:
     bool m_useLCV;
 
     CPSolver(const mat2i& distance);
-    virtual ~CPSolver();
+    virtual ~CPSolver() = default;
 
 private:
     void solveImpl(const mat2i& solution);
