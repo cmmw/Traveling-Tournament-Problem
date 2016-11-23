@@ -7,9 +7,10 @@
 //============================================================================
 
 #include "LNS.h"
-#include "repair/CPSolver.h"
 #include "Factorization.h"
 #include "Common.h"
+#include "repair/CSPRepair.h"
+#include "repair/NNRepair.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -28,19 +29,19 @@ template<class T>
 mat2i callSolver(T& solver);
 
 const char* instances[] =
-        { "instances/data8.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
+        { "instances/data8.txt", "instances/data10.txt", "instances/data12.txt", "instances/data14.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
 
 int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data8.txt");
-//    test<CPSolver>("instances/data10.txt");
+    testLNS<Factorization>("instances/data6.txt");
+//    test<CSPRepair>("instances/data12.txt");
+//    test<NNRepair>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");
-//    test<DFSStar>("instances/data4.txt");
-//    benchmark<CPSolver>();
+//    benchmark<CSPRepair>();
+//    benchmark<NNRepair>();
 //    benchmark<Factorization>();
-//    benchmark<DFSStar>();
     return 0;
 }
 

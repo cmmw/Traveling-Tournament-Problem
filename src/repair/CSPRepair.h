@@ -10,14 +10,14 @@
 
 #include "IRepair.h"
 
-class CPSolver: public IRepair
+class CSPRepair: public IRepair
 {
 public:
     bool m_useMRV;
     bool m_useLCV;
 
-    CPSolver(const mat2i& distance);
-    virtual ~CPSolver() = default;
+    CSPRepair(const mat2i& distance);
+    virtual ~CSPRepair() = default;
 
 private:
     void solveImpl(const mat2i& solution);

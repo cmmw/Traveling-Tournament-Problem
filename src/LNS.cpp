@@ -6,7 +6,6 @@
  */
 
 #include "LNS.h"
-#include "repair/CPSolver.h"
 #include "repair/NNRepair.h"
 #include "destroy/DestroyHomes.h"
 #include "destroy/DestroyRandom.h"
@@ -16,6 +15,7 @@
 #include <algorithm>
 #include <iostream>
 #include <typeindex>
+#include "repair/CSPRepair.h"
 
 LNS::LNS(const mat2i& distance) :
         m_upperBound(std::numeric_limits<int>::max()), m_distance(distance)

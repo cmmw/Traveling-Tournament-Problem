@@ -5,19 +5,19 @@
  *      Author: Christian
  */
 
-#include "CPSolver.h"
+#include "CSPRepair.h"
 
 #include <algorithm>
 #include <queue>
 #include <map>
 #include <iostream>
 
-CPSolver::CPSolver(const mat2i& distance) :
+CSPRepair::CSPRepair(const mat2i& distance) :
         IRepair(distance), m_useMRV(true), m_useLCV(true)
 {
 }
 
-bool CPSolver::getNextVariable(int& team, int& round, const mat2i& solution)
+bool CSPRepair::getNextVariable(int& team, int& round, const mat2i& solution)
 {
     if (m_useMRV)
     {
@@ -28,7 +28,7 @@ bool CPSolver::getNextVariable(int& team, int& round, const mat2i& solution)
     }
 }
 
-std::vector<int> CPSolver::valueOrderHeuristic(const mat2i& solution, int team, int round)
+std::vector<int> CSPRepair::valueOrderHeuristic(const mat2i& solution, int team, int round)
 {
     std::vector<int> domain = m_domain[team][round];
     if (m_useLCV)
@@ -45,7 +45,7 @@ std::vector<int> CPSolver::valueOrderHeuristic(const mat2i& solution, int team, 
     return domain;
 }
 
-bool CPSolver::getNextUnassignedVar(int& team, int& round, const mat2i& solution)
+bool CSPRepair::getNextUnassignedVar(int& team, int& round, const mat2i& solution)
 {
     for (int t = 0; t < m_teams; t++)
     {
@@ -62,7 +62,7 @@ bool CPSolver::getNextUnassignedVar(int& team, int& round, const mat2i& solution
     return false;
 }
 
-bool CPSolver::getMRV(int& team, int& round, const mat2i& solution)
+bool CSPRepair::getMRV(int& team, int& round, const mat2i& solution)
 {
     bool found = false;
     unsigned int rv = std::numeric_limits<unsigned int>::max();
@@ -85,7 +85,7 @@ bool CPSolver::getMRV(int& team, int& round, const mat2i& solution)
     return found;
 }
 
-int CPSolver::ruledOutValues(int team, int round, int value, const mat2i& solution)
+int CSPRepair::ruledOutValues(int team, int round, int value, const mat2i& solution)
 {
     int ruledOut = 0;
     ruledOut += ruledOutHorizontal(team, round, value, solution);
@@ -112,7 +112,7 @@ int CPSolver::ruledOutValues(int team, int round, int value, const mat2i& soluti
     return ruledOut;
 }
 
-int CPSolver::ruledOutHorizontal(int team, int round, int value, const mat2i& solution)
+int CSPRepair::ruledOutHorizontal(int team, int round, int value, const mat2i& solution)
 {
     int cnt = 0;
     /*
@@ -130,7 +130,7 @@ int CPSolver::ruledOutHorizontal(int team, int round, int value, const mat2i& so
     return cnt;
 }
 
-int CPSolver::ruledOutVertical(int team, int round, int value, const mat2i& solution)
+int CSPRepair::ruledOutVertical(int team, int round, int value, const mat2i& solution)
 {
     int cnt = 0;
     /*
@@ -150,7 +150,7 @@ int CPSolver::ruledOutVertical(int team, int round, int value, const mat2i& solu
     return cnt;
 }
 
-int CPSolver::ruledOutOpponent(int team, int round, int value, const mat2i& solution)
+int CSPRepair::ruledOutOpponent(int team, int round, int value, const mat2i& solution)
 {
     int cnt = 0;
     /*
@@ -165,7 +165,7 @@ int CPSolver::ruledOutOpponent(int team, int round, int value, const mat2i& solu
     return cnt;
 }
 
-int CPSolver::ruledOutNoRepeat(int team, int round, int value, const mat2i& solution)
+int CSPRepair::ruledOutNoRepeat(int team, int round, int value, const mat2i& solution)
 {
     int cnt = 0;
     /*
@@ -192,7 +192,7 @@ int CPSolver::ruledOutNoRepeat(int team, int round, int value, const mat2i& solu
     return cnt;
 }
 
-int CPSolver::ruledOutAtMost(int team, int round, int value, const mat2i& solution)
+int CSPRepair::ruledOutAtMost(int team, int round, int value, const mat2i& solution)
 {
     int cnt = 0;
     /*
