@@ -44,6 +44,7 @@ mat2i LNS::solve(const mat2i& solution)
 {
     m_upperBound = Common::eval(solution, m_distance);
     Common::printMatrix(solution);
+    std::cout << m_upperBound << std::endl;
     mat2i bestSol = solution;
     mat2i curSol = solution;
     bool done = false;
@@ -82,7 +83,7 @@ mat2i LNS::solve(const mat2i& solution)
 mat2i LNS::destroy(const mat2i& solution, int method)
 {
     m_usedDestroyMethods[method]++;
-//    std::cout << typeid(*m_destroyMethods[method]).name() << std::endl;
+    std::cout << typeid(*m_destroyMethods[method]).name() << std::endl;
     return m_destroyMethods[method]->destroy(solution);
 }
 
