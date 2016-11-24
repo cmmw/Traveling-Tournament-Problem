@@ -47,7 +47,7 @@ protected:
 
 private:
     void init(mat2i& solution);
-    bool backTrack(mat2i& solution, int lds);
+    bool backTrack(mat2i& solution, int k, int variablesLeft);
     bool forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup);
     bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
 

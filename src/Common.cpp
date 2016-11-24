@@ -72,3 +72,19 @@ int Common::eval(const mat2i& solution, const mat2i& distance)
     }
     return costs;
 }
+
+int Common::countUnsetVariables(const mat2i& solution)
+{
+    int free = 0;
+    for (unsigned int t = 0; t < solution.size(); t++)
+    {
+        for (unsigned int r = 0; r < solution[t].size(); r++)
+        {
+            if (solution[t][r] == 0)
+            {
+                free++;
+            }
+        }
+    }
+    return free;
+}

@@ -7,6 +7,7 @@
 
 #include "IRepair.h"
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 
 IRepair::IRepair(const mat2i& distance) :
@@ -68,16 +69,29 @@ mat2i IRepair::solve(const mat2i& solution, int upperBound)
     m_bestSolutionValue = std::numeric_limits<int>::max();
     mat2i sol = solution;
     init(sol);
-    //TODO implement LDS: first iteration 0 discrepancies, second iteration 1 discrepancy etc. etc.
-    backTrack(sol, 8);
+
+    int vars = Common::countUnsetVariables(solution);
+    int kMax = 10;
+    int k = 0;
+    while (k <= kMax && !backTrack(sol, k++, vars))
+        ;
+
     return m_bestSolution;
 }
 
-bool IRepair::backTrack(mat2i& solution, int lds)
+//limited discrepancy search
+bool IRepair::backTrack(mat2i& solution, int k, int variablesLeft)
 {
+    //we have to follow the non-heuristic path 'k' times, but only 'nodesLeft' choices left -> prune this path
+    if (variablesLeft < k)
+        return false;
+
     int team, round;
     if (!getNextVariable(team, round, solution))
     {
+        //k has to be 0 at this point, otherwise we did not apply the limited discrepancy search correctly
+//        assert(k == 0);
+
         int value = Common::eval(solution, m_distance);
         if (value < m_upperBound)
         {
@@ -95,11 +109,15 @@ bool IRepair::backTrack(mat2i& solution, int lds)
 
     std::vector<int> domain = valueOrderHeuristic(solution, team, round);
 
-    int i = 0;
-    for (auto d : domain)
+    unsigned int i = 0;
+    //Don't follow the heuristic (number of choices left equals the number of choices we have to not follow the heuristic)
+    if (variablesLeft == k)
+        i = 1;
+    for (; i < domain.size(); i++)
     {
-        //if i = 0 we follow the heuristic. only a number of lds choices allowed to not follow the heuristic
-        if (i != 0 && lds == 0)
+        int d = domain[i];
+        //number of choices to not follow the heuristic is 0, only go 'left' (i = 0)
+        if (i != 0 && k == 0)
             break;
 
         std::vector<DomainBackupEntry> domainBackup;
@@ -115,7 +133,7 @@ bool IRepair::backTrack(mat2i& solution, int lds)
 
         if (forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
         {
-            if (backTrack(solution, (i == 0) ? lds : lds - 1))
+            if (backTrack(solution, (i == 0) ? k : k - 1, (setOpponent) ? variablesLeft - 2 : variablesLeft - 1))
                 return true;
         }
 
@@ -125,7 +143,6 @@ bool IRepair::backTrack(mat2i& solution, int lds)
         {
             m_domain[b.m_team][b.m_round] = b.m_backup;
         }
-        i++;
     }
     solution[team][round] = 0;
     return false;

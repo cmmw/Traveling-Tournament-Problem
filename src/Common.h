@@ -21,7 +21,7 @@ public:
     static void initSolution(int n, mat2i& solution);
     static void printMatrix(const mat2i& matrix);
     static int eval(const mat2i& solution, const mat2i& distance);
-
+    static int countUnsetVariables(const mat2i& solution);
 };
 
 #endif /* COMMON_H_ */
