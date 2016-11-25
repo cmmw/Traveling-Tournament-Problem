@@ -31,7 +31,6 @@ mat2i DestroyRounds::destroy(const mat2i& solution)
         roundCosts[r] = roundDistance(solution, r);
     }
     std::iota(rounds.begin(), rounds.end(), 0);
-    std::cout << "rand: " << rand() << std::endl;
     std::default_random_engine engine(rand());
     std::discrete_distribution<> dist;
 

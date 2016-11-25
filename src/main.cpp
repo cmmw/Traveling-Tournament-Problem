@@ -36,7 +36,7 @@ const char* instances[] =
 int main()
 {
     srand(time(nullptr));
-    
+
     testLNS<Factorization>("instances/data8.txt");
 //    test<CSPRepair>("instances/data12.txt");
 //    test<NNRepair>("instances/data10.txt");
