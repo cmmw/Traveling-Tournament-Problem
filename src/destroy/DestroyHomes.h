@@ -19,7 +19,7 @@ public:
     mat2i destroy(const mat2i& solution);
 
 private:
-    mat2i m_distance;
+    std::vector<int> homeDistance(const mat2i& solution);
 };
 
 #endif /* DESTROY_DESTROYHOMES_H_ */

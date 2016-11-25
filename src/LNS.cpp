@@ -20,9 +20,9 @@
 LNS::LNS(const mat2i& distance) :
         m_upperBound(std::numeric_limits<int>::max()), m_distance(distance)
 {
-    m_destroyMethods.push_back(new DestroyRounds(distance));
+//    m_destroyMethods.push_back(new DestroyRounds(distance));
 //    m_destroyMethods.push_back(new DestroyTeams(distance));
-//    m_destroyMethods.push_back(new DestroyHomes(distance));
+    m_destroyMethods.push_back(new DestroyHomes(distance));
 //    m_destroyMethods.push_back(new DestroyRandom(distance));
 
 //    m_repairMethods.push_back(new CSPRepair(distance));
