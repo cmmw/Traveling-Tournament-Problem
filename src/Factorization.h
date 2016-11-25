@@ -16,7 +16,7 @@ public:
     Factorization(const mat2i& distance);
     virtual ~Factorization();
 
-    bool solve(mat2i &solution);
+    mat2i solve();
 
 private:
     int m_teams;

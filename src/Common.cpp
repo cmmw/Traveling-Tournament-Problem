@@ -88,3 +88,22 @@ int Common::countUnsetVariables(const mat2i& solution)
     }
     return free;
 }
+
+int Common::getDistance(const mat2i& distance, int teamIdx, int t1, int t2)
+{
+    //both play at home
+    if (t1 > 0 && t2 > 0)
+        return 0;
+
+    //both play away
+    if (t1 < 0 && t2 < 0)
+        return distance[std::abs(t1) - 1][std::abs(t2) - 1];
+
+    //t1 home, t2 away
+    if (t1 > 0 && t2 < 0)
+        return distance[teamIdx][std::abs(t2) - 1];
+
+    //t1 away, t2 home
+    return distance[std::abs(t1) - 1][teamIdx];
+
+}

@@ -17,6 +17,11 @@ public:
     virtual ~DestroyRounds();
 
     mat2i destroy(const mat2i& solution);
+
+private:
+    //Calculate the distance of all games playing (round-1) against (round) and (round) against (round + 1)
+    int roundDistance(const mat2i& solution, int round);
+
 };
 
 #endif /* DESTROY_DESTROYROUNDS_H_ */

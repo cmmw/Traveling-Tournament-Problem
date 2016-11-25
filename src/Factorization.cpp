@@ -18,9 +18,9 @@ Factorization::~Factorization()
 {
 }
 
-bool Factorization::solve(mat2i& solution)
+mat2i Factorization::solve()
 {
-    solution.clear();
+    mat2i solution;
     Common::initSolution(m_teams, solution);
 
     std::vector<int> polygon(m_teams - 1);
@@ -58,6 +58,6 @@ bool Factorization::solve(mat2i& solution)
         }
         polygon[0] = tmp;
     }
-    return true;
+    return solution;
 }
 

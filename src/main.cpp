@@ -35,8 +35,6 @@ const char* instances[] =
 
 int main()
 {
-    srand(time(nullptr));
-
     testLNS<Factorization>("instances/data8.txt");
 //    test<CSPRepair>("instances/data12.txt");
 //    test<NNRepair>("instances/data10.txt");
@@ -129,7 +127,7 @@ void testLNS(const char* instance)
     mat2i distance = readInstance(instance);
     mat2i initSolution;
     T solver(distance);
-    solver.solve(initSolution);
+    initSolution = solver.solve();
 
     LNS lns(distance);
 
@@ -152,7 +150,5 @@ mat2i callSolver(T& solver)
 template<>
 mat2i callSolver(Factorization& solver)
 {
-    mat2i solution;
-    solver.solve(solution);
-    return solution;
+    return solver.solve();
 }
