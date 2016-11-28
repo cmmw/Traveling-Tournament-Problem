@@ -71,7 +71,7 @@ mat2i IRepair::solve(const mat2i& solution, int upperBound)
     init(sol);
 
     int vars = Common::countUnsetVariables(solution);
-    int kMax = 3;
+    int kMax = 4;
     int k = 0;
     while (k <= kMax && !backTrack(sol, k++, vars))
         ;

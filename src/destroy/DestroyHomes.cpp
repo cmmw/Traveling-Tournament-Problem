@@ -31,7 +31,7 @@ mat2i DestroyHomes::destroy(const mat2i& solution)
     std::discrete_distribution<> dist;
 
     std::vector<int> selected;
-    int size = 5;
+    int size = (5 <= m_teams) ? 5 : m_teams;
     for (int i = 0; i < size; i++)
     {
         std::discrete_distribution<>::param_type param(homeCosts.begin(), homeCosts.end());
