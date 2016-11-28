@@ -6,7 +6,6 @@
  */
 
 #include "LNS.h"
-#include "repair/NNRepair.h"
 #include "destroy/DestroyHomes.h"
 #include "destroy/DestroyRandom.h"
 #include "destroy/DestroyRounds.h"
@@ -16,6 +15,8 @@
 #include <iostream>
 #include <typeindex>
 #include "repair/CSPRepair.h"
+#include "repair/NNLRepair.h"
+#include "repair/NNRRepair.h"
 
 LNS::LNS(const mat2i& distance) :
         m_upperBound(std::numeric_limits<int>::max()), m_distance(distance)
@@ -25,8 +26,9 @@ LNS::LNS(const mat2i& distance) :
     m_destroyMethods.push_back(new DestroyHomes(distance));
     m_destroyMethods.push_back(new DestroyRandom(distance));
 
-//    m_repairMethods.push_back(new CSPRepair(distance));
-    m_repairMethods.push_back(new NNRepair(distance));
+    m_repairMethods.push_back(new CSPRepair(distance));
+    m_repairMethods.push_back(new NNLRepair(distance));
+    m_repairMethods.push_back(new NNRRepair(distance));
 
     m_usedRepairMethods.resize(m_repairMethods.size());
     m_usedDestroyMethods.resize(m_destroyMethods.size());
@@ -91,7 +93,7 @@ mat2i LNS::repair(const mat2i& solution, int method)
 {
     m_usedRepairMethods[method]++;
 //    std::cout << typeid(*m_repairMethods[method]).name() << std::endl;
-    return m_repairMethods[method]->solve(solution, m_upperBound);
+    return m_repairMethods[method]->solve(solution, m_upperBound * 0.7);
 }
 
 bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)
@@ -105,6 +107,7 @@ bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)
 
 void LNS::printStatistics()
 {
+    std::cout << "------------USAGE------------" << std::endl;
     std::cout << "Repair-methods used:" << std::endl;
     for (unsigned int i = 0; i < m_usedRepairMethods.size(); i++)
     {
@@ -117,6 +120,7 @@ void LNS::printStatistics()
         std::cout << typeid(*m_destroyMethods[i]).name() << ": " << m_usedDestroyMethods[i] << ", ";
     }
     std::cout << std::endl;
+    std::cout << "------------IMPROVEMENTS------------" << std::endl;
     std::cout << "Repair-methods improved solution:" << std::endl;
     for (unsigned int i = 0; i < m_repairMethodImproved.size(); i++)
     {

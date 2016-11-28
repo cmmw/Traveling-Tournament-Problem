@@ -5,42 +5,56 @@
  *      Author: Christian
  */
 
-#include "NNRepair.h"
+#include "NNLRepair.h"
+
 #include <cmath>
 #include <algorithm>
 #include <iostream>
 
-NNRepair::NNRepair(const mat2i& distance) :
+NNLRepair::NNLRepair(const mat2i& distance) :
         IRepair(distance)
 {
 }
 
-NNRepair::~NNRepair()
+NNLRepair::~NNLRepair()
 {
 }
 
-bool NNRepair::getNextVariable(int& team, int& round, const mat2i& solution)
+bool NNLRepair::getNextVariable(int& team, int& round, const mat2i& solution)
 {
-    //This heuristic assumes that all games before the current round are set for the team
+    //return the variable which will increase the costs by a minimum (from left to right)
     bool found = false;
-    unsigned int rv = std::numeric_limits<unsigned int>::max();
-    for (int r = 0; r < m_rounds && !found; r++)
+    int costs = std::numeric_limits<int>::max();
+    for (int r = 0; r < m_rounds; r++)
     {
         for (int t = 0; t < m_teams; t++)
         {
-            if (solution[t][r] == 0 && m_domain[t][r].size() < rv)
+            if (solution[t][r] == 0 && (r == 0 || solution[t][r - 1] != 0))
             {
-                rv = m_domain[t][r].size();
-                team = t;
-                round = r;
-                found = true;
+                int from;
+                if (r == 0)
+                    from = t + 1;
+                else
+                    from = solution[t][r - 1];
+
+                for (auto d : m_domain[t][r])
+                {
+                    int c = Common::getDistance(m_distance, t, from, d);
+                    if (c < costs)
+                    {
+                        costs = c;
+                        team = t;
+                        round = r;
+                        found = true;
+                    }
+                }
             }
         }
     }
     return found;
 }
 
-std::vector<int> NNRepair::valueOrderHeuristic(const mat2i& solution, int team, int round)
+std::vector<int> NNLRepair::valueOrderHeuristic(const mat2i& solution, int team, int round)
 {
     std::vector<int> domain = m_domain[team][round];
     std::sort(domain.begin(), domain.end(), [&] (int v1, int v2)

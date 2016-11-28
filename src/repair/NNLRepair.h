@@ -5,21 +5,21 @@
  *      Author: Christian
  */
 
-#ifndef REPAIR_NNREPAIR_H_
-#define REPAIR_NNREPAIR_H_
+#ifndef REPAIR_NNLREPAIR_H_
+#define REPAIR_NNLREPAIR_H_
 
 #include "IRepair.h"
 #include "../Common.h"
 
-class NNRepair: public IRepair
+class NNLRepair: public IRepair
 {
 public:
-    NNRepair(const mat2i& distance);
-    virtual ~NNRepair();
+    NNLRepair(const mat2i& distance);
+    virtual ~NNLRepair();
 
 private:
     bool getNextVariable(int& team, int& round, const mat2i& solution);
     std::vector<int> valueOrderHeuristic(const mat2i& solution, int team, int round);
 };
 
-#endif /* REPAIR_NNREPAIR_H_ */
+#endif /* REPAIR_NNLREPAIR_H_ */
