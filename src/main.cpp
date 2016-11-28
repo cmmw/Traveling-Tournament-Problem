@@ -37,7 +37,7 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data16.txt");
+    testLNS<Factorization>("instances/data6.txt");
 //    test<CSPRepair>("instances/data12.txt");
 //    test<NNLRepair>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");
