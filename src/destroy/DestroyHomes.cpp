@@ -57,8 +57,7 @@ mat2i DestroyHomes::destroy(const mat2i& solution)
 
 std::vector<int> DestroyHomes::homeDistance(const mat2i& solution)
 {
-    std::vector<int> homeDistance(m_teams, 1);
-
+    std::vector<int> homeDistance(m_teams);
     for (int t = 0; t < m_teams; t++)
     {
         int opponent = solution[t][0];

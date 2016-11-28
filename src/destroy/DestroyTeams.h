@@ -17,6 +17,9 @@ public:
     virtual ~DestroyTeams();
 
     mat2i destroy(const mat2i& solution);
+
+private:
+    std::vector<int> teamDistance(const mat2i& solution);
 };
 
 #endif /* DESTROY_DESTROYTEAMS_H_ */
