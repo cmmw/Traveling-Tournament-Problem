@@ -24,6 +24,7 @@ protected:
     int m_rounds;
     int m_upperBound;
     int m_bestSolutionValue;
+    int m_u;
     mat2i m_bestSolution;
     const mat2i m_distance;
     mat3i m_domain;

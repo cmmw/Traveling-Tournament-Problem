@@ -11,7 +11,7 @@
 #include <iostream>
 
 IRepair::IRepair(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_upperBound(std::numeric_limits<int>::max()), m_bestSolutionValue(std::numeric_limits<int>::max()), m_distance(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_upperBound(std::numeric_limits<int>::max()), m_bestSolutionValue(std::numeric_limits<int>::max()), m_u(3), m_distance(distance)
 {
 }
 
@@ -169,18 +169,17 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
     }
 
     /*
-     * At most U (fixed to 3 for now) consecutive games home or away: take all subsets of consecutive variables with length U+1 and count number of
+     * At most U (m_u) consecutive games home or away: take all subsets of consecutive variables with length U+1 and count number of
      * home or away games, if number is U -> remove all negative or positive values from domain of the unassigned variables domain
      */
-    int u = 3;
-    for (int i = round - u; i < round + 1; i++)
+    for (int i = round - m_u; i < round + 1; i++)
     {
         if (i >= 0 && i < m_rounds)
         {
             int countAway = 0;
             int countHome = 0;
             std::vector<std::vector<int>*> domainsOfVars;
-            for (int j = 0; j < u + 1; j++)
+            for (int j = 0; j < m_u + 1; j++)
             {
                 if (i + j < m_rounds)
                 {
@@ -198,7 +197,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
                     }
                 }
             }
-            if (countAway == u)
+            if (countAway == m_u)
             {
                 for (auto d : domainsOfVars)
                 {
@@ -207,7 +206,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
                     if (d->empty())
                         return false;
                 }
-            } else if (countHome == u)
+            } else if (countHome == m_u)
             {
                 for (auto d : domainsOfVars)
                 {

@@ -199,8 +199,7 @@ int CSPRepair::ruledOutAtMost(int team, int round, int value, const mat2i& solut
      * At most U (fixed to 3 for now) consecutive games home or away: take all subsets of consecutive variables with length U+1 and count number of
      * home or away games, if number is U -> remove all negative or positive values from domain of the unassigned variables domain
      */
-    int u = 3;
-    for (int i = round - u; i < round + 1; i++)
+    for (int i = round - m_u; i < round + 1; i++)
     {
         if (i >= 0 && i < m_rounds)
         {
@@ -211,7 +210,7 @@ int CSPRepair::ruledOutAtMost(int team, int round, int value, const mat2i& solut
             else
                 countHome++;
             std::vector<const std::vector<int>*> domainsOfVars;
-            for (int j = 0; j < u + 1; j++)
+            for (int j = 0; j < m_u + 1; j++)
             {
                 if (i + j < m_rounds)
                 {
@@ -227,14 +226,14 @@ int CSPRepair::ruledOutAtMost(int team, int round, int value, const mat2i& solut
                     }
                 }
             }
-            if (countAway == u)
+            if (countAway == m_u)
             {
                 for (auto d : domainsOfVars)
                 {
                     cnt += std::count_if(d->begin(), d->end(), [](int x)
                     {   return x < 0;});
                 }
-            } else if (countHome == u)
+            } else if (countHome == m_u)
             {
                 for (auto d : domainsOfVars)
                 {
