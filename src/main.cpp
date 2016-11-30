@@ -54,6 +54,7 @@ mat2i readInstance(const char* instance)
     if (fs.fail())
     {
         std::cerr << "failed to open instance" << std::endl;
+        exit(1);
         return distance;
     }
 
