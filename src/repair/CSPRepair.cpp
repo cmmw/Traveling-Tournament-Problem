@@ -13,7 +13,7 @@
 #include <iostream>
 
 CSPRepair::CSPRepair(const mat2i& distance) :
-        IRepair(distance), m_useMRV(true), m_useLCV(true)
+        IBacktrack(distance), m_useMRV(true), m_useLCV(true)
 {
 }
 

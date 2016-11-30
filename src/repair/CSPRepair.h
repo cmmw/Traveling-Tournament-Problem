@@ -8,9 +8,9 @@
 #ifndef CPSOLVER_H_
 #define CPSOLVER_H_
 
-#include "IRepair.h"
+#include "IBacktrack.h"
 
-class CSPRepair: public IRepair
+class CSPRepair: public IBacktrack
 {
 public:
     bool m_useMRV;
@@ -20,7 +20,6 @@ public:
     virtual ~CSPRepair() = default;
 
 private:
-    void solveImpl(const mat2i& solution);
     bool backTrack(mat2i& solution);
 
     bool getNextVariable(int& team, int& round, const mat2i& solution);

@@ -17,7 +17,8 @@ public:
     IRepair(const mat2i& distance);
     virtual ~IRepair() = default;
 
-    mat2i solve(const mat2i& solution, int upperBound = std::numeric_limits<int>::max());
+    virtual mat2i solve(const mat2i& solution, int upperBound = std::numeric_limits<int>::max());
+    virtual mat2i solveImpl(const mat2i& solution) = 0;
 
 protected:
     int m_teams;
@@ -45,14 +46,9 @@ protected:
         std::vector<int> m_backup;
     };
 
-private:
     void init(mat2i& solution);
-    bool backTrack(mat2i& solution, int k, int variablesLeft);
     bool forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup);
     bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
-
-    virtual bool getNextVariable(int& team, int& round, const mat2i& solution) = 0;
-    virtual std::vector<int> valueOrderHeuristic(const mat2i& solution, int team, int round) = 0;
 
 };
 

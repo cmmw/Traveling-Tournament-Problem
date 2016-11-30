@@ -12,7 +12,7 @@
 #include <iostream>
 
 NNLRepair::NNLRepair(const mat2i& distance) :
-        IRepair(distance)
+        IBacktrack(distance)
 {
 }
 

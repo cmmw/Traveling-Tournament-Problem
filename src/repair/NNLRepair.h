@@ -8,10 +8,10 @@
 #ifndef REPAIR_NNLREPAIR_H_
 #define REPAIR_NNLREPAIR_H_
 
-#include "IRepair.h"
+#include "IBacktrack.h"
 #include "../Common.h"
 
-class NNLRepair: public IRepair
+class NNLRepair: public IBacktrack
 {
 public:
     NNLRepair(const mat2i& distance);
