@@ -25,7 +25,7 @@ mat2i IBacktrack::solveImpl(const mat2i& solution)
     mat2i sol = solution;
     init(sol);
 
-    int vars = Common::countUnsetVariables(solution);
+    int vars = Common::countUnsetVariables(sol);
     int kMax = 4;
     int k = 0;
     while (k <= kMax && !backTrack(sol, k++, vars))
