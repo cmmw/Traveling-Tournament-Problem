@@ -18,7 +18,6 @@ public:
     virtual ~IRepair() = default;
 
     virtual mat2i solve(const mat2i& solution, int upperBound = std::numeric_limits<int>::max());
-    virtual mat2i solveImpl(const mat2i& solution) = 0;
 
 protected:
     int m_teams;
@@ -49,6 +48,9 @@ protected:
     void init(mat2i& solution);
     bool forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup);
     bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
+
+private:
+    virtual mat2i solveImpl(const mat2i& solution) = 0;
 
 };
 
