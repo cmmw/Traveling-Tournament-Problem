@@ -232,3 +232,10 @@ bool IRepair::contains(int team, int round, const std::vector<DomainBackupEntry>
     return false;
 }
 
+void IRepair::resetDoamin(const std::vector<DomainBackupEntry>& domainBackup)
+{
+    for (auto& b : domainBackup)
+    {
+        m_domain[b.m_team][b.m_round] = b.m_backup;
+    }
+}

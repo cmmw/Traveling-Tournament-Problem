@@ -94,10 +94,7 @@ bool IBacktrack::backTrack(mat2i& solution, int k, int variablesLeft)
 
         if (setOpponent)
             solution[std::abs(d) - 1][round] = 0;
-        for (auto& b : domainBackup)
-        {
-            m_domain[b.m_team][b.m_round] = b.m_backup;
-        }
+        resetDoamin(domainBackup);
     }
     solution[team][round] = 0;
     return false;
