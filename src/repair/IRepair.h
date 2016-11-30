@@ -25,7 +25,7 @@ protected:
     int m_upperBound;
     int m_bestSolutionValue;
     mat2i m_bestSolution;
-    mat2i m_distance;
+    const mat2i m_distance;
     mat3i m_domain;
 
     class DomainBackupEntry
