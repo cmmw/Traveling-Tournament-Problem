@@ -65,7 +65,7 @@ bool CSPRepair::getNextUnassignedVar(int& team, int& round, const mat2i& solutio
 bool CSPRepair::getMRV(int& team, int& round, const mat2i& solution)
 {
     bool found = false;
-    unsigned int rv = std::numeric_limits<unsigned int>::max();
+    unsigned int rv = std::numeric_limits<decltype(rv)>::max();
     for (int t = 0; t < m_teams; t++)
     {
         for (int r = 0; r < m_rounds; r++)

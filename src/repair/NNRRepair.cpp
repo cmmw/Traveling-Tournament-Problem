@@ -24,7 +24,7 @@ bool NNRRepair::getNextVariable(int& team, int& round, const mat2i& solution)
 {
     //return the variable which will increase the costs by a minimum (from right to left)
     bool found = false;
-    int costs = std::numeric_limits<int>::max();
+    int costs = std::numeric_limits<decltype(costs)>::max();
     for (int r = 0; r < m_rounds; r++)
     {
         for (int t = 0; t < m_teams; t++)

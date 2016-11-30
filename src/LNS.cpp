@@ -20,16 +20,16 @@
 #include "repair/EdgeRepair.h"
 
 LNS::LNS(const mat2i& distance) :
-        m_upperBound(std::numeric_limits<int>::max()), m_distance(distance)
+        m_upperBound(std::numeric_limits<decltype(m_upperBound)>::max()), m_distance(distance)
 {
     m_destroyMethods.push_back(new DestroyRounds(distance));
     m_destroyMethods.push_back(new DestroyTeams(distance));
     m_destroyMethods.push_back(new DestroyHomes(distance));
     m_destroyMethods.push_back(new DestroyRandom(distance));
 
-    m_repairMethods.push_back(new CSPRepair(distance));
-    m_repairMethods.push_back(new NNLRepair(distance));
-    m_repairMethods.push_back(new NNRRepair(distance));
+//    m_repairMethods.push_back(new CSPRepair(distance));
+//    m_repairMethods.push_back(new NNLRepair(distance));
+//    m_repairMethods.push_back(new NNRRepair(distance));
     m_repairMethods.push_back(new EdgeRepair(distance));
 
     m_usedRepairMethods.resize(m_repairMethods.size());
