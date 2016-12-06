@@ -7,6 +7,7 @@
 
 #include "IBacktrack.h"
 #include <cmath>
+#include <cstdlib>
 
 IBacktrack::IBacktrack(const mat2i& distance) :
         IRepair(distance)
@@ -37,7 +38,7 @@ mat2i IBacktrack::solveImpl(const mat2i& solution)
 
     return m_bestSolution;
 }
-#include <iostream>
+
 void IBacktrack::improve(mat2i& solution)
 {
     mat2i map = Common::calcTravelMap(solution);
