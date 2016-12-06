@@ -115,17 +115,15 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
     /*
      * Opponent team has to play against this team: Set domain of the variable of the opponent game to -X[team][round]
      */
+    int opponent;
+    if (value < 0)
+        opponent = (team + 1);
+    else
+        opponent = -(team + 1);
+
     if (solution[std::abs(value) - 1][round] == 0)
     {
         std::vector<int>& opponentDomain = m_domain[std::abs(value) - 1][round];
-        int opponent;
-        if (value < 0)
-        {
-            opponent = (team + 1);
-        } else
-        {
-            opponent = -(team + 1);
-        }
 
         if (std::find(opponentDomain.begin(), opponentDomain.end(), opponent) == opponentDomain.end())
         {
@@ -137,6 +135,25 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
             opponentDomain.clear();
             opponentDomain.push_back(opponent);
         }
+
+        //Also remove -team and +team in column from all other variables domains
+        for (int i = 0; i < m_teams; i++)
+        {
+            if (i != std::abs(value) - 1 && solution[i][round] == 0)
+            {
+                std::vector<int>& _domain = m_domain[i][round];
+                if (!contains(i, round, domainBackup))
+                    domainBackup.push_back(DomainBackupEntry(i, round, _domain));
+                _domain.erase(std::remove(_domain.begin(), _domain.end(), opponent), _domain.end());
+                _domain.erase(std::remove(_domain.begin(), _domain.end(), -opponent), _domain.end());
+                if (_domain.empty())
+                    return false;
+            }
+        }
+
+    } else if (solution[std::abs(value) - 1][round] != opponent)
+    {
+        return false;
     }
 
     //Additional constraints:

@@ -24,6 +24,7 @@ public:
     static int countUnsetVariables(const mat2i& solution);
     //team with index teamIdx plays against t1 and then t2, calculate travel distance
     static int getDistance(const mat2i& distance, int teamIdx, int t1, int t2);
+    static mat2i calcTravelMap(const mat2i& solution);
 };
 
 #endif /* COMMON_H_ */

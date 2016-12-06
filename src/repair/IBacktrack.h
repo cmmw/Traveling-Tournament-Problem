@@ -18,6 +18,7 @@ public:
 
 private:
     mat2i solveImpl(const mat2i& solution);
+    void improve(mat2i& solution);
     bool backTrack(mat2i& solution, int k, int variablesLeft);
     virtual bool getNextVariable(int& team, int& round, const mat2i& solution) = 0;
     virtual std::vector<int> valueOrderHeuristic(const mat2i& solution, int team, int round) = 0;

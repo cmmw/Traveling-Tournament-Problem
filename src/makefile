@@ -1,4 +1,4 @@
-CCFLAGS = -g -pedantic -Wall -std=c++11 -IE:/libs/SFML-2.3.2/include
+CCFLAGS = -g -pedantic -Wall -std=c++11
 LDFLAGS =  
 
 STATIC_LIBS=

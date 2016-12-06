@@ -10,13 +10,14 @@
 #include "Factorization.h"
 #include "Common.h"
 #include "repair/CSPRepair.h"
+#include "repair/NNLRepair.h"
+#include "repair/EdgeRepair.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
 #include <sstream>
-#include "repair/NNLRepair.h"
 
 mat2i readInstance(const char* instance);
 template<class T>
@@ -38,7 +39,8 @@ int main()
     srand(time(nullptr));
 
     testLNS<Factorization>("instances/data6.txt");
-//    test<CSPRepair>("instances/data4.txt");
+//    test<EdgeRepair>("instances/data4.txt");
+//    test<CSPRepair>("instances/data6.txt");
 //    test<NNLRepair>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");
 //    benchmark<CSPRepair>();

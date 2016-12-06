@@ -107,3 +107,51 @@ int Common::getDistance(const mat2i& distance, int teamIdx, int t1, int t2)
     return distance[std::abs(t1) - 1][teamIdx];
 
 }
+
+mat2i Common::calcTravelMap(const mat2i& solution)
+{
+    int teams = solution.size();
+    int rounds = teams * 2 - 2;
+    mat2i travelMap(teams);
+    for (auto& m : travelMap)
+        m.resize(teams);
+
+    for (int t = 0; t < teams; t++)
+    {
+        if (solution[t][0] < 0)
+        {
+            travelMap[t][std::abs(solution[t][0]) - 1]++;
+            travelMap[std::abs(solution[t][0]) - 1][t]++;
+        }
+        if (solution[t][rounds - 1] < 0)
+        {
+            travelMap[t][std::abs(solution[t][rounds - 1]) - 1]++;
+            travelMap[std::abs(solution[t][rounds - 1]) - 1][t]++;
+        }
+        for (int r = 0; r < rounds - 1; r++)
+        {
+            int t1 = solution[t][r];
+            int t2 = solution[t][r + 1];
+            if (std::signbit(t1) != std::signbit(t2))
+            {
+                if (t1 > 0)
+                {
+                    //t1 > 0, t2 < 0
+                    travelMap[t][std::abs(t2) - 1]++;
+                    travelMap[std::abs(t2) - 1][t]++;
+                } else
+                {
+                    //t1 < 0, t2 > 0
+                    travelMap[std::abs(t1) - 1][t]++;
+                    travelMap[t][std::abs(t1) - 1]++;
+                }
+            } else if (t1 < 0)
+            {
+                //both < 0
+                travelMap[std::abs(t1) - 1][std::abs(t2) - 1]++;
+                travelMap[std::abs(t2) - 1][std::abs(t1) - 1]++;
+            }
+        }
+    }
+    return travelMap;
+}

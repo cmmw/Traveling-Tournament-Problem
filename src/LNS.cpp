@@ -27,10 +27,10 @@ LNS::LNS(const mat2i& distance) :
     m_destroyMethods.push_back(new DestroyHomes(distance));
     m_destroyMethods.push_back(new DestroyRandom(distance));
 
-//    m_repairMethods.push_back(new CSPRepair(distance));
-//    m_repairMethods.push_back(new NNLRepair(distance));
-//    m_repairMethods.push_back(new NNRRepair(distance));
-    m_repairMethods.push_back(new EdgeRepair(distance));
+    m_repairMethods.push_back(new CSPRepair(distance));
+    m_repairMethods.push_back(new NNLRepair(distance));
+    m_repairMethods.push_back(new NNRRepair(distance));
+//    m_repairMethods.push_back(new EdgeRepair(distance));
 
     m_usedRepairMethods.resize(m_repairMethods.size());
     m_usedDestroyMethods.resize(m_destroyMethods.size());
