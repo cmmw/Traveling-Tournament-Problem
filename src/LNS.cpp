@@ -27,9 +27,9 @@ LNS::LNS(const mat2i& distance) :
     m_destroyMethods.push_back(new DestroyHomes(distance));
     m_destroyMethods.push_back(new DestroyRandom(distance));
 
-//    m_repairMethods.push_back(new CSPRepair(distance));
+    m_repairMethods.push_back(new CSPRepair(distance));
     m_repairMethods.push_back(new GreedyRepair(distance));
-//    m_repairMethods.push_back(new BeamSearch(distance));
+    m_repairMethods.push_back(new BeamSearch(distance));
 
     m_usedRepairMethods.resize(m_repairMethods.size());
     m_usedDestroyMethods.resize(m_destroyMethods.size());
@@ -60,6 +60,7 @@ mat2i LNS::solve(const mat2i& solution)
 
         if (!tempSol.empty())
         {
+//            permuteTeams(tempSol);
             if (accept(tempSol, curSol))
             {
                 curSol = tempSol;
@@ -73,12 +74,6 @@ mat2i LNS::solve(const mat2i& solution)
                 m_destroyMethodImproved[destroyMethod]++;
                 i = 0;
             }
-        }
-
-        if (permuteTeams(curSol))
-        {
-            bestSol = curSol;
-            m_upperBound = Common::eval(bestSol, m_distance);
         }
 
         if (i == 100)
@@ -118,57 +113,58 @@ bool LNS::permuteTeams(mat2i& solution)
     bool improved = false;
     int teams = solution.size();
     int oldDistance = Common::eval(solution, m_distance);
-    //Improve solution by swapping teams, find good pairs to swap
-    for (int i = 0; i < 200; i++)
+    int swapT1 = 0;
+    int swapT2 = 0;
+    int bestImprove = 0;
+    //Improve solution by swapping 2 teams, find best pair
+    for (int t1 = 0; t1 < teams; t1++)
     {
-        //teams to swap
-        int t1;
-        int t2;
-        do
+        for (int t2 = t1 + 1; t2 < teams; t2++)
         {
-            t1 = (std::rand() % teams) + 1;
-            t2 = (std::rand() % teams) + 1;
-        } while (t1 == t2);
-
-        //calculate improvement
-        int o1 = 0;
-        int n1 = 0;
-        int o2 = 0;
-        int n2 = 0;
-        for (int j = 0; j < teams; j++)
-        {
-            if (j == t2 - 1 || j == t1 - 1)
-                continue;
-
-            o1 += (map[t1 - 1][j] * m_distance[t1 - 1][j]);
-            o2 += (map[t2 - 1][j] * m_distance[t2 - 1][j]);
-
-            n1 += (map[t1 - 1][j] * m_distance[t2 - 1][j]);
-            n2 += (map[t2 - 1][j] * m_distance[t1 - 1][j]);
-        }
-
-        int improvement = (n1 + n2 - o1 - o2);
-
-        //If change in distance is negative
-        if (improvement < 0)
-        {
-            improved = true;
-            for (auto& r : solution)
+            //calculate improvement with teams t1 and t2 swapped
+            int o1 = 0;
+            int n1 = 0;
+            int o2 = 0;
+            int n2 = 0;
+            for (int j = 0; j < teams; j++)
             {
-                for (auto& t : r)
-                {
-                    if (std::abs(t) == t1)
-                        t = t2 * (t / std::abs(t));
-                    else if (std::abs(t) == t2)
-                        t = t1 * (t / std::abs(t));
-                }
+                if (j == t2 || j == t1)
+                    continue;
+
+                o1 += (map[t1][j] * m_distance[t1][j]);
+                o2 += (map[t2][j] * m_distance[t2][j]);
+
+                n1 += (map[t1][j] * m_distance[t2][j]);
+                n2 += (map[t2][j] * m_distance[t1][j]);
             }
-            std::swap(solution[t1 - 1], solution[t2 - 1]);
-            map = Common::calcTravelMap(solution);
+
+            int improvement = (n1 + n2 - o1 - o2);
+
+            //If change in distance is negative
+            if (improvement < bestImprove)
+            {
+                bestImprove = improvement;
+                swapT1 = t1;
+                swapT2 = t2;
+                improved = true;
+            }
         }
     }
     if (improved)
+    {
+        for (auto& r : solution)
+        {
+            for (auto& t : r)
+            {
+                if (std::abs(t) == swapT1 + 1)
+                    t = (swapT2 + 1) * (t / std::abs(t));
+                else if (std::abs(t) == swapT2 + 1)
+                    t = (swapT1 + 1) * (t / std::abs(t));
+            }
+        }
+        std::swap(solution[swapT1], solution[swapT2]);
         std::cout << "improved team swaps: " << oldDistance << " -> " << Common::eval(solution, m_distance) << std::endl;
+    }
     return improved;
 }
 
