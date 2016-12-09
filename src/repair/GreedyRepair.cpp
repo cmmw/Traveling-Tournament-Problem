@@ -1,26 +1,26 @@
 /*
- * NNRepair.cpp
+ * GreedyRepair.cpp
  *
  *  Created on: 22.11.2016
  *      Author: Christian
  */
 
-#include "NNLRepair.h"
+#include "GreedyRepair.h"
 
 #include <cmath>
 #include <algorithm>
 #include <iostream>
 
-NNLRepair::NNLRepair(const mat2i& distance) :
+GreedyRepair::GreedyRepair(const mat2i& distance) :
         IBacktrack(distance)
 {
 }
 
-NNLRepair::~NNLRepair()
+GreedyRepair::~GreedyRepair()
 {
 }
 
-bool NNLRepair::getNextVariable(int& team, int& round, const mat2i& solution)
+bool GreedyRepair::getNextVariable(int& team, int& round, const mat2i& solution)
 {
     //return the variable which will increase the costs by a minimum (from left to right)
     bool found = false;
@@ -54,7 +54,7 @@ bool NNLRepair::getNextVariable(int& team, int& round, const mat2i& solution)
     return found;
 }
 
-std::vector<int> NNLRepair::valueOrderHeuristic(const mat2i& solution, int team, int round)
+std::vector<int> GreedyRepair::valueOrderHeuristic(const mat2i& solution, int team, int round)
 {
     std::vector<int> domain = m_domain[team][round];
     std::sort(domain.begin(), domain.end(), [&] (int v1, int v2)

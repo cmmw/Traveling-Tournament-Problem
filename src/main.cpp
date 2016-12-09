@@ -10,7 +10,6 @@
 #include "Factorization.h"
 #include "Common.h"
 #include "repair/CSPRepair.h"
-#include "repair/NNLRepair.h"
 #include "repair/BeamSearch.h"
 #include <iostream>
 #include <fstream>
@@ -18,6 +17,7 @@
 #include <ctime>
 #include <chrono>
 #include <sstream>
+#include "repair/GreedyRepair.h"
 
 mat2i readInstance(const char* instance);
 template<class T>
@@ -41,10 +41,10 @@ int main()
     testLNS<Factorization>("instances/data10.txt");
 //    test<BeamSearch>("instances/data10.txt");
 //    test<CSPRepair>("instances/data6.txt");
-//    test<NNLRepair>("instances/data10.txt");
+//    test<GreedyRepair>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");
 //    benchmark<CSPRepair>();
-//    benchmark<NNLRepair>();
+//    benchmark<GreedyRepair>();
 //    benchmark<Factorization>();
     return 0;
 }
