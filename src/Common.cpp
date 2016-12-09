@@ -73,6 +73,27 @@ int Common::eval(const mat2i& solution, const mat2i& distance)
     return costs;
 }
 
+int Common::homeAwayTrips(const mat2i& solution)
+{
+    int trips = 0;
+    for (unsigned int t = 0; t < solution.size(); t++)
+    {
+        if (solution[t][0] < 0)
+            trips++;
+        for (unsigned int r = 0; r < solution[t].size() - 1; r++)
+        {
+            if (solution[t][r] != 0 && solution[t][r + 1] != 0)
+            {
+                if (std::signbit(solution[t][r]) != std::signbit(solution[t][r + 1]))
+                    trips++;
+            }
+        }
+        if (solution[t][solution[t].size() - 1] < 0)
+            trips++;
+    }
+    return trips;
+}
+
 int Common::countUnsetVariables(const mat2i& solution)
 {
     int free = 0;
@@ -174,4 +195,24 @@ int Common::deltaDistance(int team, int round, int val, const mat2i& solution, c
         d += getDistance(distance, team, val, right);
 
     return d;
+}
+
+int Common::deltaTrips(int team, int round, int val, const mat2i& solution)
+{
+    int left = team + 1, right = team + 1;
+    int trips = 0;
+
+    if (round > 0)
+        left = solution[team][round - 1];
+
+    if (round < (int) solution[0].size() - 1)
+        right = solution[team][round + 1];
+
+    if (left != 0 && std::signbit(left) != std::signbit(val))
+        trips++;
+
+    if (right != 0 && std::signbit(right) != std::signbit(val))
+        trips++;
+
+    return trips;
 }

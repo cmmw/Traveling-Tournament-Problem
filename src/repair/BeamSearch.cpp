@@ -11,7 +11,7 @@
 #include <iostream>
 
 BeamSearch::BeamSearch(const mat2i& distance) :
-        IRepair(distance), m_width(1000)
+        IRepair(distance), m_width(500)
 {
 }
 
@@ -34,7 +34,7 @@ bool BeamSearch::beamSearch(mat2i& s)
 
     std::vector<SolWithDom> currSolutions;
     currSolutions.push_back(
-            { s, m_domain, Common::eval(s, m_distance) });
+            { s, m_domain, Common::eval(s, m_distance), Common::homeAwayTrips(s) });
     do
     {
         std::vector<SolWithDom> nextSolutions;
@@ -67,8 +67,9 @@ bool BeamSearch::beamSearch(mat2i& s)
                     if (forwardCheck(team, round, sd.solution, domainBackup, sd.domain) && forwardCheck(std::abs(d) - 1, round, sd.solution, domainBackup, sd.domain))
                     {
                         int distance = sd.distance + Common::deltaDistance(team, round, sd.solution[team][round], sd.solution, m_distance) + Common::deltaDistance(std::abs(d) - 1, round, sd.solution[std::abs(d) - 1][round], sd.solution, m_distance);
+                        int trips = sd.trips + Common::deltaTrips(team, round, sd.solution[team][round], sd.solution) + Common::deltaTrips(std::abs(d) - 1, round, sd.solution[std::abs(d) - 1][round], sd.solution);
                         nextSolutions.push_back(
-                                { sd.solution, sd.domain, distance });
+                                { sd.solution, sd.domain, distance, trips });
                     }
                     if (setOpponent)
                         sd.solution[std::abs(d) - 1][round] = 0;
@@ -83,6 +84,11 @@ bool BeamSearch::beamSearch(mat2i& s)
             {
                 return sd1.distance < sd2.distance;
             });
+//            int alpha = m_width / 2;
+//            std::sort(nextSolutions.begin() + alpha, nextSolutions.end(), [&](const SolWithDom& sd1, const SolWithDom& sd2)
+//            {
+//                return sd1.trips < sd2.trips;
+//            });
             nextSolutions.resize(m_width);
         }
 

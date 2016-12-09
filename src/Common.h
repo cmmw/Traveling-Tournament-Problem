@@ -21,11 +21,13 @@ public:
     static void initSolution(int n, mat2i& solution);
     static void printMatrix(const mat2i& matrix);
     static int eval(const mat2i& solution, const mat2i& distance);
+    static int homeAwayTrips(const mat2i& solution);
     static int countUnsetVariables(const mat2i& solution);
     //team with index teamIdx plays against t1 and then t2, calculate travel distance
     static int getDistance(const mat2i& distance, int teamIdx, int t1, int t2);
     static mat2i calcTravelMap(const mat2i& solution);
     static int deltaDistance(int team, int round, int val, const mat2i& solution, const mat2i& distance);
+    static int deltaTrips(int team, int round, int val, const mat2i& solution);
 };
 
 #endif /* COMMON_H_ */

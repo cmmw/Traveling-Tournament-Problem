@@ -15,6 +15,7 @@ struct SolWithDom
     mat2i solution;
     mat3i domain;
     int distance;
+    int trips;
 };
 
 class BeamSearch: public IRepair
