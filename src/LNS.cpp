@@ -75,6 +75,12 @@ mat2i LNS::solve(const mat2i& solution)
             }
         }
 
+        if (permuteTeams(curSol))
+        {
+            bestSol = curSol;
+            m_upperBound = Common::eval(bestSol, m_distance);
+        }
+
         if (i == 100)
             done = true;
         i++;
@@ -106,6 +112,66 @@ bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)
     return false;
 }
 
+bool LNS::permuteTeams(mat2i& solution)
+{
+    mat2i map = Common::calcTravelMap(solution);
+    bool improved = false;
+    int teams = solution.size();
+    int oldDistance = Common::eval(solution, m_distance);
+    //Improve solution by swapping teams, find good pairs to swap
+    for (int i = 0; i < 200; i++)
+    {
+        //teams to swap
+        int t1;
+        int t2;
+        do
+        {
+            t1 = (std::rand() % teams) + 1;
+            t2 = (std::rand() % teams) + 1;
+        } while (t1 == t2);
+
+        //calculate improvement
+        int o1 = 0;
+        int n1 = 0;
+        int o2 = 0;
+        int n2 = 0;
+        for (int j = 0; j < teams; j++)
+        {
+            if (j == t2 - 1 || j == t1 - 1)
+                continue;
+
+            o1 += (map[t1 - 1][j] * m_distance[t1 - 1][j]);
+            o2 += (map[t2 - 1][j] * m_distance[t2 - 1][j]);
+
+            n1 += (map[t1 - 1][j] * m_distance[t2 - 1][j]);
+            n2 += (map[t2 - 1][j] * m_distance[t1 - 1][j]);
+        }
+
+        int improvement = (n1 + n2 - o1 - o2);
+
+        //If change in distance is negative
+        if (improvement < 0)
+        {
+            improved = true;
+            for (auto& r : solution)
+            {
+                for (auto& t : r)
+                {
+                    if (std::abs(t) == t1)
+                        t = t2 * (t / std::abs(t));
+                    else if (std::abs(t) == t2)
+                        t = t1 * (t / std::abs(t));
+                }
+            }
+            std::swap(solution[t1 - 1], solution[t2 - 1]);
+            map = Common::calcTravelMap(solution);
+        }
+    }
+    if (improved)
+        std::cout << "improved team swaps: " << oldDistance << " -> " << Common::eval(solution, m_distance) << std::endl;
+    return improved;
+}
+
 void LNS::printStatistics()
 {
     std::cout << "------------USAGE------------" << std::endl;
@@ -135,3 +201,4 @@ void LNS::printStatistics()
     }
     std::cout << std::endl;
 }
+

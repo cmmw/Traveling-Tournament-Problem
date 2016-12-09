@@ -32,7 +32,7 @@ private:
     mat2i destroy(const mat2i& solution, int method);
     mat2i repair(const mat2i& solution, int method);
     bool accept(const mat2i& newSol, const mat2i& oldSol);
-
+    bool permuteTeams(mat2i& solution);
     void printStatistics();
 };
 
