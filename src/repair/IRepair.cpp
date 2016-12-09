@@ -72,9 +72,14 @@ void IRepair::init(mat2i& solution)
 
 bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup)
 {
+    return forwardCheck(team, round, solution, domainBackup, m_domain);
+}
+
+bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vector<DomainBackupEntry>& domainBackup, mat3i& domain)
+{
     int value = solution[team][round];
 
-    if (std::find(m_domain[team][round].begin(), m_domain[team][round].end(), value) == m_domain[team][round].end())
+    if (std::find(domain[team][round].begin(), domain[team][round].end(), value) == domain[team][round].end())
         return false;
 
     /*
@@ -85,7 +90,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
     {
         if (solution[i][round] == 0)
         {
-            std::vector<int>& _domain = m_domain[i][round];
+            std::vector<int>& _domain = domain[i][round];
             if (!contains(i, round, domainBackup))
                 domainBackup.push_back(DomainBackupEntry(i, round, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), value), _domain.end());
@@ -103,7 +108,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
     {
         if (solution[team][i] == 0)
         {
-            std::vector<int>& _domain = m_domain[team][i];
+            std::vector<int>& _domain = domain[team][i];
             if (!contains(team, i, domainBackup))
                 domainBackup.push_back(DomainBackupEntry(team, i, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), value), _domain.end());
@@ -123,7 +128,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
 
     if (solution[std::abs(value) - 1][round] == 0)
     {
-        std::vector<int>& opponentDomain = m_domain[std::abs(value) - 1][round];
+        std::vector<int>& opponentDomain = domain[std::abs(value) - 1][round];
 
         if (std::find(opponentDomain.begin(), opponentDomain.end(), opponent) == opponentDomain.end())
         {
@@ -141,7 +146,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
         {
             if (i != std::abs(value) - 1 && solution[i][round] == 0)
             {
-                std::vector<int>& _domain = m_domain[i][round];
+                std::vector<int>& _domain = domain[i][round];
                 if (!contains(i, round, domainBackup))
                     domainBackup.push_back(DomainBackupEntry(i, round, _domain));
                 _domain.erase(std::remove(_domain.begin(), _domain.end(), opponent), _domain.end());
@@ -164,7 +169,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
     {
         if (solution[team][round - 1] == 0)
         {
-            std::vector<int>& _domain = m_domain[team][round - 1];
+            std::vector<int>& _domain = domain[team][round - 1];
             if (!contains(team, round - 1, domainBackup))
                 domainBackup.push_back(DomainBackupEntry(team, round - 1, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
@@ -176,7 +181,7 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
     {
         if (solution[team][round + 1] == 0)
         {
-            std::vector<int>& _domain = m_domain[team][round + 1];
+            std::vector<int>& _domain = domain[team][round + 1];
             if (!contains(team, round + 1, domainBackup))
                 domainBackup.push_back(DomainBackupEntry(team, round + 1, _domain));
             _domain.erase(std::remove(_domain.begin(), _domain.end(), -value), _domain.end());
@@ -208,9 +213,9 @@ bool IRepair::forwardCheck(int team, int round, const mat2i& solution, std::vect
                         countHome++;
                     } else
                     {
-                        domainsOfVars.push_back(&m_domain[team][i + j]);
+                        domainsOfVars.push_back(&domain[team][i + j]);
                         if (!contains(team, i + j, domainBackup))
-                            domainBackup.push_back(DomainBackupEntry(team, i + j, m_domain[team][i + j]));
+                            domainBackup.push_back(DomainBackupEntry(team, i + j, domain[team][i + j]));
                     }
                 }
             }
@@ -250,8 +255,13 @@ bool IRepair::contains(int team, int round, const std::vector<DomainBackupEntry>
 
 void IRepair::resetDoamin(const std::vector<DomainBackupEntry>& domainBackup)
 {
+    resetDoamin(domainBackup, m_domain);
+}
+
+void IRepair::resetDoamin(const std::vector<DomainBackupEntry>& domainBackup, mat3i& domain)
+{
     for (auto& b : domainBackup)
     {
-        m_domain[b.m_team][b.m_round] = b.m_backup;
+        domain[b.m_team][b.m_round] = b.m_backup;
     }
 }

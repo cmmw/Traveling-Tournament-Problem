@@ -155,3 +155,24 @@ mat2i Common::calcTravelMap(const mat2i& solution)
     }
     return travelMap;
 }
+
+int Common::deltaDistance(int team, int round, const mat2i& solution, const mat2i& distance)
+{
+    int left = team + 1, right = team + 1;
+    int val = solution[team][round];
+    int d = 0;
+
+    if (round > 0)
+        left = solution[team][round - 1];
+
+    if (round < (int) solution[0].size() - 1)
+        right = solution[team][round + 1];
+
+    if (left != 0)
+        d += getDistance(distance, team, left, val);
+
+    if (right != 0)
+        d += getDistance(distance, team, val, right);
+
+    return d;
+}

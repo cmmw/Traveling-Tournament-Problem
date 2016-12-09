@@ -11,7 +11,7 @@
 #include "Common.h"
 #include "repair/CSPRepair.h"
 #include "repair/NNLRepair.h"
-#include "repair/EdgeRepair.h"
+#include "repair/BeamSearch.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -38,8 +38,8 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data6.txt");
-//    test<EdgeRepair>("instances/data4.txt");
+    testLNS<Factorization>("instances/data10.txt");
+//    test<BeamSearch>("instances/data10.txt");
 //    test<CSPRepair>("instances/data6.txt");
 //    test<NNLRepair>("instances/data10.txt");
 //    test<Factorization>("instances/data10.txt");

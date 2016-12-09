@@ -33,8 +33,8 @@ mat2i IBacktrack::solveImpl(const mat2i& solution)
         ;
 
     //Try to improve the solution
-    if (!m_bestSolution.empty())
-        improve(m_bestSolution);
+//    if (!m_bestSolution.empty())
+//        improve(m_bestSolution);
 
     return m_bestSolution;
 }
