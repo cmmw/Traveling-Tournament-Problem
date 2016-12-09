@@ -66,7 +66,7 @@ bool BeamSearch::beamSearch(mat2i& s)
                     std::vector<DomainBackupEntry> domainBackup;
                     if (forwardCheck(team, round, sd.solution, domainBackup, sd.domain) && forwardCheck(std::abs(d) - 1, round, sd.solution, domainBackup, sd.domain))
                     {
-                        int distance = sd.distance + Common::deltaDistance(team, round, sd.solution, m_distance) + Common::deltaDistance(std::abs(d) - 1, round, sd.solution, m_distance);
+                        int distance = sd.distance + Common::deltaDistance(team, round, sd.solution[team][round], sd.solution, m_distance) + Common::deltaDistance(std::abs(d) - 1, round, sd.solution[std::abs(d) - 1][round], sd.solution, m_distance);
                         nextSolutions.push_back(
                                 { sd.solution, sd.domain, distance });
                     }

@@ -25,7 +25,7 @@ public:
     //team with index teamIdx plays against t1 and then t2, calculate travel distance
     static int getDistance(const mat2i& distance, int teamIdx, int t1, int t2);
     static mat2i calcTravelMap(const mat2i& solution);
-    static int deltaDistance(int team, int round, const mat2i& solution, const mat2i& distance);
+    static int deltaDistance(int team, int round, int val, const mat2i& solution, const mat2i& distance);
 };
 
 #endif /* COMMON_H_ */
