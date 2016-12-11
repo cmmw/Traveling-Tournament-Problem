@@ -29,17 +29,21 @@ mat2i IBacktrack::solveImpl(const mat2i& solution)
     int vars = Common::countUnsetVariables(sol);
     int kMax = 4;
     int k = 0;
-    while (k <= kMax && !backTrack(sol, k++, vars))
+    int distance = Common::eval(sol, m_distance);
+    while (k <= kMax && !backTrack(sol, distance, k++, vars))
         ;
 
     return m_bestSolution;
 }
 
 //limited discrepancy search
-bool IBacktrack::backTrack(mat2i& solution, int k, int variablesLeft)
+bool IBacktrack::backTrack(mat2i& solution, int distance, int k, int variablesLeft)
 {
     //we have to follow the non-heuristic path 'k' times, but only 'nodesLeft' choices left -> prune this path
     if (variablesLeft < k)
+        return false;
+
+    if (calcLowerBound(solution, distance) > m_bestSolutionValue)
         return false;
 
     int team, round;
@@ -89,7 +93,10 @@ bool IBacktrack::backTrack(mat2i& solution, int k, int variablesLeft)
 
         if (forwardCheck(team, round, solution, domainBackup) && (!setOpponent || forwardCheck(std::abs(d) - 1, round, solution, domainBackup)))
         {
-            if (backTrack(solution, (i == 0) ? k : k - 1, (setOpponent) ? variablesLeft - 2 : variablesLeft - 1))
+            int newDistance = distance + Common::deltaDistance(team, round, d, solution, m_distance);
+            if (setOpponent)
+                newDistance += Common::deltaDistance(std::abs(d) - 1, round, solution[std::abs(d) - 1][round], solution, m_distance);
+            if (backTrack(solution, newDistance, (i == 0) ? k : k - 1, (setOpponent) ? variablesLeft - 2 : variablesLeft - 1))
                 return true;
         }
 
