@@ -52,6 +52,8 @@ protected:
     bool contains(int team, int round, const std::vector<DomainBackupEntry>& domainBackup);
     void resetDoamin(const std::vector<DomainBackupEntry>& domainBackup);
     void resetDoamin(const std::vector<DomainBackupEntry>& domainBackup, mat3i& domain);
+    int calcLowerBound(const mat2i& solution, int costs);
+    int calcLowerBound(const mat2i& solution, int costs, const mat3i& domain);
 
 private:
     virtual mat2i solveImpl(const mat2i& solution) = 0;

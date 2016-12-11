@@ -265,3 +265,13 @@ void IRepair::resetDoamin(const std::vector<DomainBackupEntry>& domainBackup, ma
         domain[b.m_team][b.m_round] = b.m_backup;
     }
 }
+
+int IRepair::calcLowerBound(const mat2i& solution, int costs)
+{
+    return calcLowerBound(solution, costs, m_domain);
+}
+
+int IRepair::calcLowerBound(const mat2i& solution, int costs, const mat3i& domain)
+{
+    return costs;
+}
