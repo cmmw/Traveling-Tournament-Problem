@@ -43,7 +43,7 @@ bool IBacktrack::backTrack(mat2i& solution, int distance, int k, int variablesLe
     if (variablesLeft < k)
         return false;
 
-    if (calcLowerBound(solution, distance) > m_bestSolutionValue)
+    if (calcLowerBound(solution, distance) > m_upperBound)
         return false;
 
     int team, round;
@@ -53,13 +53,13 @@ bool IBacktrack::backTrack(mat2i& solution, int distance, int k, int variablesLe
 //        assert(k == 0);
 
         int value = Common::eval(solution, m_distance);
-        if (value < m_upperBound)
+        if (value < m_threshold)
         {
             m_bestSolution = solution;
             return true;
         }
-        //Kepp track of the best solution found so far, even if it is not better than the upper bound
-        if (m_bestSolution.empty() || value < m_bestSolutionValue)
+        //Keep track of the best solution found so far
+        if (value < m_bestSolutionValue)
         {
             m_bestSolution = solution;
             m_bestSolutionValue = value;

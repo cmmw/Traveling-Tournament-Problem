@@ -10,14 +10,14 @@
 #include "destroy/DestroyRandom.h"
 #include "destroy/DestroyRounds.h"
 #include "destroy/DestroyTeams.h"
-#include <cstdlib>
-#include <algorithm>
-#include <iostream>
-#include <typeindex>
 #include "repair/CSPRepair.h"
 #include "repair/GreedyRepair.h"
 #include "repair/BeamSearch.h"
 #include "repair/GreedyRepair.h"
+#include <cstdlib>
+#include <algorithm>
+#include <iostream>
+#include <typeindex>
 
 LNS::LNS(const mat2i& distance) :
         m_upperBound(std::numeric_limits<decltype(m_upperBound)>::max()), m_distance(distance)
@@ -69,7 +69,7 @@ mat2i LNS::solve(const mat2i& solution)
             {
                 bestSol = tempSol;
                 m_upperBound = Common::eval(tempSol, m_distance);
-                std::cout << Common::eval(bestSol, m_distance) << std::endl;
+                std::cout << m_upperBound << std::endl;
                 m_repairMethodImproved[repairMethod]++;
                 m_destroyMethodImproved[destroyMethod]++;
                 i = 0;
@@ -95,7 +95,7 @@ mat2i LNS::repair(const mat2i& solution, int method)
 {
     m_usedRepairMethods[method]++;
 //    std::cout << typeid(*m_repairMethods[method]).name() << std::endl;
-    return m_repairMethods[method]->solve(solution, m_upperBound * 0.7);
+    return m_repairMethods[method]->solve(solution, m_upperBound, m_upperBound * 0.7);
 }
 
 bool LNS::accept(const mat2i& newSol, const mat2i& oldSol)

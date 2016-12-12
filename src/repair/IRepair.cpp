@@ -11,15 +11,16 @@
 #include <iostream>
 
 IRepair::IRepair(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_upperBound(std::numeric_limits<decltype(m_upperBound)>::max()), m_bestSolutionValue(std::numeric_limits<decltype(m_bestSolutionValue)>::max()), m_u(3), m_distance(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_threshold(std::numeric_limits<decltype(m_threshold)>::max()), m_bestSolutionValue(std::numeric_limits<decltype(m_bestSolutionValue)>::max()), m_upperBound(std::numeric_limits<decltype(m_upperBound)>::max()), m_u(3), m_distance(distance)
 {
 }
 
-mat2i IRepair::solve(const mat2i& solution, int upperBound)
+mat2i IRepair::solve(const mat2i& solution, int upperBound, int threshold)
 {
     m_bestSolution.clear();
-    m_upperBound = upperBound;
+    m_threshold = threshold;
     m_bestSolutionValue = std::numeric_limits<decltype(m_bestSolutionValue)>::max();
+    m_upperBound = upperBound;
     return solveImpl(solution);
 }
 
@@ -273,5 +274,67 @@ int IRepair::calcLowerBound(const mat2i& solution, int costs)
 
 int IRepair::calcLowerBound(const mat2i& solution, int costs, const mat3i& domain)
 {
+    int teams = solution.size();
+    int rounds = 2 * teams - 2;
+    for (int t = 0; t < teams; t++)
+    {
+        if (solution[t][0] == 0)
+        {
+            int cheapestEdge = std::numeric_limits<int>::max();
+            for (auto d : domain[t][0])
+            {
+                int dist = Common::getDistance(m_distance, t, t + 1, d);
+                if (cheapestEdge > dist)
+                {
+                    cheapestEdge = dist;
+                    if (dist == 0)
+                        break;
+                }
+            }
+            costs += cheapestEdge;
+        }
+
+        for (int r = 0; r < rounds; r++)
+        {
+            if (solution[t][r] == 0)
+            {
+                int next;
+                if (r < rounds - 1)
+                    next = solution[t][r + 1];
+                else
+                    next = t + 1;
+
+                int cheapestEdge = std::numeric_limits<int>::max();
+                for (auto d1 : domain[t][r])
+                {
+                    int dist;
+                    if (next != 0)
+                    {
+                        dist = Common::getDistance(m_distance, t, d1, next);
+                        if (cheapestEdge > dist)
+                        {
+                            cheapestEdge = dist;
+                            if (dist == 0)
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        for (auto d2 : domain[t][r + 1])
+                        {
+                            dist = Common::getDistance(m_distance, t, d1, d2);
+                            if (cheapestEdge > dist)
+                            {
+                                cheapestEdge = dist;
+                                if (dist == 0)
+                                    break;
+                            }
+                        }
+                    }
+                }
+                costs += cheapestEdge;
+            }
+        }
+    }
     return costs;
 }

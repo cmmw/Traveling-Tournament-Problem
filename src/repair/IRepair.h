@@ -17,13 +17,14 @@ public:
     IRepair(const mat2i& distance);
     virtual ~IRepair() = default;
 
-    virtual mat2i solve(const mat2i& solution, int upperBound = std::numeric_limits<int>::max());
+    virtual mat2i solve(const mat2i& solution, int upperBound = std::numeric_limits<int>::max(), int threshold = std::numeric_limits<int>::max());
 
 protected:
     int m_teams;
     int m_rounds;
-    int m_upperBound;
+    int m_threshold;
     int m_bestSolutionValue;
+    int m_upperBound;
     int m_u;
     mat2i m_bestSolution;
     const mat2i m_distance;
