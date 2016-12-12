@@ -52,6 +52,8 @@ bool IBacktrack::backTrack(mat2i& solution, int distance, int k, int variablesLe
         //k has to be 0 at this point, otherwise we did not apply the limited discrepancy search correctly
 //        assert(k == 0);
 
+//(if the lower bound is checked against m_upperbound during the search, value can never be > than m_upperBound
+//or m_bestSolutionValue at this point)
         int value = Common::eval(solution, m_distance);
         if (value < m_threshold)
         {
