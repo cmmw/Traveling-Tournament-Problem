@@ -43,7 +43,7 @@ bool IBacktrack::backTrack(mat2i& solution, int distance, int k, int variablesLe
     if (variablesLeft < k)
         return false;
 
-    if (calcLowerBound(solution, distance) > m_upperBound)
+    if (calcLowerBound(solution, distance) >= m_upperBound)
         return false;
 
     int team, round;
@@ -63,6 +63,8 @@ bool IBacktrack::backTrack(mat2i& solution, int distance, int k, int variablesLe
         {
             m_bestSolution = solution;
             m_bestSolutionValue = value;
+            if (value < m_upperBound)
+                m_upperBound = value;
         }
         return false;
     }
