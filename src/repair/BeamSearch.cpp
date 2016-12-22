@@ -33,11 +33,13 @@ bool BeamSearch::beamSearch(mat2i& s)
 {
 
     std::vector<SolWithDom> currSolutions;
+    currSolutions.reserve(m_width);
     currSolutions.push_back(
             { s, m_domain, Common::eval(s, m_distance), Common::homeAwayTrips(s) });
     do
     {
         std::vector<SolWithDom> nextSolutions;
+        nextSolutions.reserve(m_width);
         for (auto sd : currSolutions)
         {
             int team;
