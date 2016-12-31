@@ -9,6 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iomanip>
+#include <cmath>
 
 void Common::initSolution(int n, mat2i& solution)
 {

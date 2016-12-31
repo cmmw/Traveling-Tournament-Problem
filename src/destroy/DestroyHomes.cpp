@@ -10,6 +10,7 @@
 #include <numeric>
 #include <algorithm>
 #include <iostream>
+#include <random>
 
 DestroyHomes::DestroyHomes(const mat2i& distance) :
         IDestroy(distance)
