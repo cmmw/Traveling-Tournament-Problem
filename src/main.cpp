@@ -11,13 +11,13 @@
 #include "Common.h"
 #include "repair/CSPRepair.h"
 #include "repair/BeamSearch.h"
+#include "repair/GreedyRepair.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
 #include <sstream>
-#include "repair/GreedyRepair.h"
 
 mat2i readInstance(const char* instance);
 template<class T>
@@ -104,7 +104,6 @@ void test(const char* instance)
     std::cout << "Took: " << duration << "ms" << std::endl;
 }
 
-#include <windows.h>
 template<class T>
 void benchmark()
 {
