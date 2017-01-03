@@ -12,7 +12,7 @@
 #include "repair/CSPRepair.h"
 #include "repair/BeamSearch.h"
 #include "repair/GreedyRepair.h"
-#include "ipsolver/IPSolver.h"
+#include "repair/IPSolver.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -37,8 +37,8 @@ int main()
 {
     srand(time(nullptr));
 
-//    testLNS<Factorization>("instances/data10.txt");
-    test<IPSolver>("instances/data4.txt");
+    testLNS<Factorization>("instances/data16.txt");
+//    test<IPSolver>("instances/data4.txt");
 //    test<BeamSearch>("instances/data10.txt");
 //    test<CSPRepair>("instances/data6.txt");
 //    test<GreedyRepair>("instances/data10.txt");
