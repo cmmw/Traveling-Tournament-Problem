@@ -1,7 +1,11 @@
-CCFLAGS = -g -pedantic -Wall -std=c++11
-LDFLAGS =  
 
-STATIC_LIBS=
+LIBDIR=-L/home/christian/lib/cplex-12.7.0/lib/x86-64_linux/static_pic -L/home/christian/lib/cplex-12.7.0/concert/lib/x86-64_linux/static_pic
+INCDIR=-I/home/christian/lib/cplex-12.7.0/concert/include/ -I/home/christian/lib/cplex-12.7.0/include/
+
+CCFLAGS=-g -pedantic -Wall -std=c++11 -DIL_STD $(INCDIR)
+LDFLAGS=$(LIBDIR)
+
+STATIC_LIBS=-lconcert -lilocplex -lcplexdistmip -lcplex -lpthread
 DYNAMIC_LIBS=
 
 CC = g++

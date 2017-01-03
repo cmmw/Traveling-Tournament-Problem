@@ -12,6 +12,7 @@
 #include "repair/CSPRepair.h"
 #include "repair/BeamSearch.h"
 #include "repair/GreedyRepair.h"
+#include "ipsolver/IPSolver.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -29,8 +30,6 @@ void testLNS(const char* instance);
 template<class T>
 mat2i callSolver(T& solver);
 
-//TODO: 1. destroy methoden ausimplementieren, 2. parameter fuer LDS berechnen/zeit die in repair methode investiert wird
-
 const char* instances[] =
         { "instances/data8.txt", "instances/data10.txt", "instances/data12.txt", "instances/data14.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
 
@@ -38,7 +37,8 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data10.txt");
+//    testLNS<Factorization>("instances/data10.txt");
+    test<IPSolver>("instances/data4.txt");
 //    test<BeamSearch>("instances/data10.txt");
 //    test<CSPRepair>("instances/data6.txt");
 //    test<GreedyRepair>("instances/data10.txt");
