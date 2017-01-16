@@ -54,14 +54,46 @@ mat2i LNS::solve(const mat2i& solution)
     mat2i curSol = solution;
     bool done = false;
     int i = 0;
+
+    std::vector<int> called(m_destroyMethods.size());
+    std::vector<int> scores(m_destroyMethods.size());
+    std::vector<float> probability(m_destroyMethods.size(), 1.0f);
+    std::default_random_engine engine(rand());
+    std::discrete_distribution<> dist;
+    std::discrete_distribution<>::param_type param(probability.begin(), probability.end());
+    dist.param(param);
+    int segment = 20;
+    float eta = 0.3;
     while (!done)
     {
-        int destroyMethod = rand() % m_destroyMethods.size();
+        if (segment == 0)
+        {
+            std::cout << "Probability: ";
+            for (unsigned int j = 0; j < m_destroyMethods.size(); j++)
+            {
+                if (called[j] != 0)
+                {
+                    probability[j] = (1 - eta) * probability[j] + eta * ((float) scores[j] / called[j]);
+                }
+                std::cout << probability[j] << ", ";
+            }
+            std::cout << std::endl;
+
+            param = std::discrete_distribution<>::param_type(probability.begin(), probability.end());
+            dist.param(param);
+
+            segment = 20;
+            std::fill(called.begin(), called.end(), 0);
+            std::fill(scores.begin(), scores.end(), 0);
+        }
+//        int destroyMethod = rand() % m_destroyMethods.size();
+        int destroyMethod = dist(engine);
         int repairMethod = rand() % m_repairMethods.size();
         mat2i tempSol = repair(destroy(curSol, destroyMethod), repairMethod);
-
+        called[destroyMethod]++;
         if (!tempSol.empty())
         {
+            scores[destroyMethod] += 2;
 //            permuteTeams(tempSol);
             if (accept(tempSol, curSol))
             {
@@ -69,6 +101,7 @@ mat2i LNS::solve(const mat2i& solution)
             }
             if (Common::eval(tempSol, m_distance) < m_upperBound)
             {
+                scores[destroyMethod] += 10;
                 bestSol = tempSol;
                 m_upperBound = Common::eval(tempSol, m_distance);
                 std::cout << m_upperBound << std::endl;
@@ -81,6 +114,7 @@ mat2i LNS::solve(const mat2i& solution)
         if (i == 500)
             done = true;
         i++;
+        segment--;
     }
     printStatistics();
     return bestSol;

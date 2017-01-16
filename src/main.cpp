@@ -37,7 +37,7 @@ int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data16.txt");
+    testLNS<Factorization>("instances/data12.txt");
 //    test<IPSolver>("instances/data4.txt");
 //    test<BeamSearch>("instances/data10.txt");
 //    test<CSPRepair>("instances/data6.txt");
