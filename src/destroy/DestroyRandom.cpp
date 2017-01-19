@@ -1,12 +1,13 @@
 /*
  * DestroyRandom.cpp
  *
- *  Created on: 19.11.2016
- *      Author: Christian
+ *  Created on: Jan 19, 2017
+ *      Author: christian
  */
 
 #include "DestroyRandom.h"
 #include <algorithm>
+#include <iostream>
 
 DestroyRandom::DestroyRandom(const mat2i& distance) :
         IDestroy(distance)
@@ -17,12 +18,11 @@ DestroyRandom::~DestroyRandom()
 {
 }
 
-mat2i DestroyRandom::destroy(const mat2i& solution)
+mat2i DestroyRandom::destroy(const mat2i& solution, int size)
 {
     mat2i destroyed = solution;
 
     //random
-    int size = m_teams * 4;
     std::vector<std::pair<int, int>> vars;
     for (int t = 0; t < m_teams; t++)
     {
@@ -32,7 +32,9 @@ mat2i DestroyRandom::destroy(const mat2i& solution)
         }
     }
     std::random_shuffle(vars.begin(), vars.end());
-
+    float s = size * m_teams * m_rounds / 100.0f;
+    size = std::round(s);
+    std::cout << "destroy " << size << " entries" << std::endl;
     for (int i = 0; i < size; i++)
     {
         int t = vars[i].first;

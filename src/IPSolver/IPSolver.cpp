@@ -5,11 +5,12 @@
  *      Author: christian
  */
 
-#include "IPSolver.h"
+#include "../IPSolver/IPSolver.h"
+
 #include <sstream>
 
 IPSolver::IPSolver(const mat2i& distance) :
-        IRepair(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance)
 {
 }
 
@@ -17,7 +18,7 @@ IPSolver::~IPSolver()
 {
 }
 
-mat2i IPSolver::solveImpl(const mat2i& solution)
+mat2i IPSolver::solve(const mat2i& solution)
 {
     IloEnv env;
     IloModel model(env);
@@ -260,8 +261,8 @@ mat2i IPSolver::solveImpl(const mat2i& solution)
 void IPSolver::setParams(IloCplex& cplex)
 {
 // print every x-th line of node-log and give more details
-    cplex.setParam(IloCplex::MIPInterval, 0);
-    cplex.setParam(IloCplex::MIPDisplay, 0);
+    cplex.setParam(IloCplex::MIPInterval, 1000);
+    cplex.setParam(IloCplex::MIPDisplay, 2);
     cplex.setWarning(cplex.getEnv().getNullStream());
     cplex.setParam(IloCplex::Threads, 8);
     cplex.setParam(IloCplex::TiLim, 60);

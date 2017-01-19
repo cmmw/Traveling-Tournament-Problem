@@ -1,8 +1,8 @@
 /*
  * DestroyTeams.cpp
  *
- *  Created on: 19.11.2016
- *      Author: Christian
+ *  Created on: Jan 19, 2017
+ *      Author: christian
  */
 
 #include "DestroyTeams.h"
@@ -21,62 +21,82 @@ DestroyTeams::~DestroyTeams()
 {
 }
 
-mat2i DestroyTeams::destroy(const mat2i& solution)
+mat2i DestroyTeams::destroy(const mat2i& solution, int size)
 {
     mat2i destroyed = solution;
     std::vector<int> teams(m_teams);
-    std::vector<int> teamCosts = teamDistance(solution);
+    std::vector<int> homeCosts = homeDistance(solution);
     std::iota(teams.begin(), teams.end(), 1);
 
     std::default_random_engine engine(rand());
     std::discrete_distribution<> dist;
 
+    //One team occurs exactly two times in (m_teams - 1) rows
+    float s = m_teams * m_rounds * size / 100.0f;
+    s = s / (2.0f * (m_teams - 1));
+    size = std::round(s);
+    if (size < 2)
+        size = 2;
+
+    std::cout << "destroy " << size << " teams" << std::endl;
     std::vector<int> selected;
-    int size = 2;
     for (int i = 0; i < size; i++)
     {
-        std::discrete_distribution<>::param_type param(teamCosts.begin(), teamCosts.end());
+        std::discrete_distribution<>::param_type param(homeCosts.begin(), homeCosts.end());
         dist.param(param);
         int tIdx = dist(engine);
         selected.push_back(teams[tIdx]);
-        teamCosts.erase(teamCosts.begin() + tIdx);
+        homeCosts.erase(homeCosts.begin() + tIdx);
         teams.erase(teams.begin() + tIdx);
     }
 
-    //swap teams: remove all entries in row t1, t2 (n >= 2) expect the ones where they play against each other and in all other cells remove the entries containing t1 or t2
+    //swap homes: for >= 1 teams remove the entries containing t1, t2, ... in the whole schedule
     for (int t = 0; t < m_teams; t++)
     {
         for (int r = 0; r < m_rounds; r++)
         {
-            int& entry = destroyed[t][r];
-            int absEntry = std::abs(entry);
-
-            if (std::find(selected.begin(), selected.end(), t + 1) != selected.end())
-            {
-                if (std::find(selected.begin(), selected.end(), absEntry) == selected.end())
-                {
-                    entry = 0;
-                }
-            } else if (std::find(selected.begin(), selected.end(), absEntry) != selected.end())
-            {
-                entry = 0;
-            }
+            int absEntry = std::abs(destroyed[t][r]);
+            if (std::find(selected.begin(), selected.end(), absEntry) != selected.end())
+                destroyed[t][r] = 0;
         }
     }
     return destroyed;
 }
 
-std::vector<int> DestroyTeams::teamDistance(const mat2i& solution)
+std::vector<int> DestroyTeams::homeDistance(const mat2i& solution)
 {
-    std::vector<int> teamDistance(m_teams);
+    std::vector<int> homeDistance(m_teams);
     for (int t = 0; t < m_teams; t++)
     {
-        teamDistance[t] += Common::getDistance(m_distance, t, t + 1, solution[t][0]);
-        for (int r = 1; r < m_rounds; r++)
+        int opponent = solution[t][0];
+        if (opponent < 0)
+            homeDistance[std::abs(opponent) - 1] += m_distance[t][std::abs(opponent) - 1];
+
+        for (int r = 1; r < m_rounds - 1; r++)
         {
-            teamDistance[t] += Common::getDistance(m_distance, t, solution[t][r - 1], solution[t][r]);
+            int start = solution[t][r - 1];
+            opponent = solution[t][r];
+            if (start < 0 && opponent > 0)
+            {
+                //Away -> Home
+                homeDistance[std::abs(start) - 1] += m_distance[std::abs(start) - 1][t];
+                homeDistance[std::abs(opponent) - 1] += m_distance[std::abs(start) - 1][t];
+            } else if (start > 0 && opponent < 0)
+            {
+                //Home -> Away
+                homeDistance[std::abs(start) - 1] += m_distance[t][std::abs(opponent) - 1];
+                homeDistance[std::abs(opponent) - 1] += m_distance[t][std::abs(opponent) - 1];
+            } else if (start < 0 && opponent < 0)
+            {
+                //Away -> Away
+                homeDistance[std::abs(start) - 1] += m_distance[std::abs(start) - 1][std::abs(opponent) - 1];
+                homeDistance[std::abs(opponent) - 1] += m_distance[std::abs(start) - 1][std::abs(opponent) - 1];
+            }
         }
-        teamDistance[t] += Common::getDistance(m_distance, t, solution[t][m_rounds - 1], t + 1);
+
+        opponent = solution[t][m_rounds - 1];
+        if (opponent < 0)
+            homeDistance[std::abs(opponent) - 1] += m_distance[std::abs(opponent) - 1][t];
     }
-    return teamDistance;
+    return homeDistance;
 }

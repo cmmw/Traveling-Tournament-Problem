@@ -1,25 +1,21 @@
 /*
  * IDestroy.h
  *
- *  Created on: 19.11.2016
- *      Author: Christian
+ *  Created on: Jan 19, 2017
+ *      Author: christian
  */
 
-#ifndef DESTROY_IDESTROY_H_
-#define DESTROY_IDESTROY_H_
+#ifndef SRC_DESTROY_IDESTROY_H_
+#define SRC_DESTROY_IDESTROY_H_
 
 #include "../Common.h"
 
 class IDestroy
 {
 public:
-    IDestroy(const mat2i& distance) :
-            m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance)
-    {
-    }
-    virtual ~IDestroy() = default;
-
-    virtual mat2i destroy(const mat2i& solution) = 0;
+    IDestroy(const mat2i& distance);
+    virtual ~IDestroy();
+    virtual mat2i destroy(const mat2i& solution, int size) = 0;
 
 protected:
     int m_teams;
@@ -27,4 +23,4 @@ protected:
     mat2i m_distance;
 };
 
-#endif /* DESTROY_IDESTROY_H_ */
+#endif /* SRC_DESTROY_IDESTROY_H_ */

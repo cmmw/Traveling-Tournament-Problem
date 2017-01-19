@@ -9,20 +9,23 @@
 #define SRC_IPSOLVER_IPSOLVER_H_
 
 #include "../Common.h"
-#include "IRepair.h"
 
 #include <vector>
 #include <ilcplex/ilocplex.h>
 
-class IPSolver: public IRepair
+class IPSolver
 {
 public:
     IPSolver(const mat2i& distance);
     virtual ~IPSolver();
 
-    mat2i solveImpl(const mat2i& solution);
+    mat2i solve(const mat2i& solution);
 
 private:
+
+    int m_teams;
+    int m_rounds;
+    mat2i m_distance;
 
     typedef std::vector<std::vector<IloIntVar>> IloIntVar2;
     typedef std::vector<IloIntVar2> IloIntVar3;

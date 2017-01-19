@@ -8,9 +8,9 @@
 #ifndef LNS_H_
 #define LNS_H_
 
-#include "repair/IRepair.h"
-#include "destroy/IDestroy.h"
 #include "Common.h"
+#include "destroy/IDestroy.h"
+#include "IPSolver/IPSolver.h"
 
 class LNS
 {
@@ -21,18 +21,19 @@ public:
     mat2i solve(const mat2i& solution);
 
 private:
-    int m_upperBound;
+    int m_teams;
+    int m_rounds;
     mat2i m_distance;
-    std::vector<int> m_usedRepairMethods;
-    std::vector<int> m_usedDestroyMethods;
-    std::vector<int> m_repairMethodImproved;
-    std::vector<int> m_destroyMethodImproved;
-    std::vector<IRepair*> m_repairMethods;
+    int m_destroyLb;
+    int m_destroyUb;
+    IPSolver m_solver;
+
     std::vector<IDestroy*> m_destroyMethods;
-    mat2i destroy(const mat2i& solution, int method);
-    mat2i repair(const mat2i& solution, int method);
-    bool accept(const mat2i& newSol, const mat2i& oldSol);
-    bool permuteTeams(mat2i& solution);
+    std::vector<int> m_destroyMethodsUsed;
+    std::vector<int> m_destroyMethodsImproved;
+
+    mat2i destroy(const mat2i& solution, int method, int destroySize);
+    bool accept(int optVal, int currentVal);
     void printStatistics();
 };
 

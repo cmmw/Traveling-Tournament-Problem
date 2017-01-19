@@ -9,16 +9,13 @@
 #include "LNS.h"
 #include "Factorization.h"
 #include "Common.h"
-#include "repair/CSPRepair.h"
-#include "repair/BeamSearch.h"
-#include "repair/GreedyRepair.h"
-#include "repair/IPSolver.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
 #include <sstream>
+#include "IPSolver/IPSolver.h"
 
 mat2i readInstance(const char* instance);
 template<class T>
@@ -31,7 +28,7 @@ template<class T>
 mat2i callSolver(T& solver);
 
 const char* instances[] =
-        { "instances/data8.txt", "instances/data10.txt", "instances/data12.txt", "instances/data14.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
+        { "instances/data4.txt", "instances/data8.txt", "instances/data10.txt", "instances/data12.txt", "instances/data14.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
 
 int main()
 {
@@ -39,12 +36,8 @@ int main()
 
     testLNS<Factorization>("instances/data12.txt");
 //    test<IPSolver>("instances/data4.txt");
-//    test<BeamSearch>("instances/data10.txt");
-//    test<CSPRepair>("instances/data6.txt");
-//    test<GreedyRepair>("instances/data10.txt");
-//    test<Factorization>("instances/data10.txt");
-//    benchmark<CSPRepair>();
-//    benchmark<GreedyRepair>();
+//    test<Factorization>("instances/data4.txt");
+//    benchmark<IPSolver>();
 //    benchmark<Factorization>();
     return 0;
 }

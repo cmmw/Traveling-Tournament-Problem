@@ -1,38 +1,41 @@
 /*
- * DestroyRounds.cpp
+ * DestroyColumn.cpp
  *
- *  Created on: 19.11.2016
- *      Author: Christian
+ *  Created on: Jan 19, 2017
+ *      Author: christian
  */
 
-#include "DestroyRounds.h"
+#include "DestroyColumns.h"
 #include <cstdlib>
 #include <numeric>
 #include <algorithm>
-#include <iostream>
 #include <random>
-
-DestroyRounds::DestroyRounds(const mat2i& distance) :
+#include <iostream>
+DestroyColumns::DestroyColumns(const mat2i& distance) :
         IDestroy(distance)
 {
 }
 
-DestroyRounds::~DestroyRounds()
+DestroyColumns::~DestroyColumns()
 {
 }
 
-mat2i DestroyRounds::destroy(const mat2i& solution)
+mat2i DestroyColumns::destroy(const mat2i& solution, int size)
 {
     mat2i destroyed = solution;
     std::vector<int> rounds(m_rounds);
-    std::vector<int> roundCosts = roundDistance(solution);
+    std::vector<int> roundCosts = roundDistances(solution);
     std::iota(rounds.begin(), rounds.end(), 0);
 
     std::default_random_engine engine(rand());
     std::discrete_distribution<> dist;
 
+    float s = m_rounds * size / 100.0f;
+    size = std::round(s);
+    if (size < 2)
+        size = 2;
+    std::cout << "destroy " << size << " columns" << std::endl;
     std::vector<int> selected;
-    int size = 5;
     for (int i = 0; i < size; i++)
     {
         std::discrete_distribution<>::param_type param(roundCosts.begin(), roundCosts.end());
@@ -52,7 +55,7 @@ mat2i DestroyRounds::destroy(const mat2i& solution)
     return destroyed;
 }
 
-std::vector<int> DestroyRounds::roundDistance(const mat2i& solution)
+std::vector<int> DestroyColumns::roundDistances(const mat2i& solution)
 {
     std::vector<int> roundDistance(m_rounds);
     for (int r = 0; r < m_rounds; r++)

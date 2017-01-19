@@ -1,12 +1,12 @@
 /*
  * DestroyRandom.h
  *
- *  Created on: 19.11.2016
- *      Author: Christian
+ *  Created on: Jan 19, 2017
+ *      Author: christian
  */
 
-#ifndef DESTROY_DESTROYRANDOM_H_
-#define DESTROY_DESTROYRANDOM_H_
+#ifndef SRC_DESTROY_DESTROYRANDOM_H_
+#define SRC_DESTROY_DESTROYRANDOM_H_
 
 #include "IDestroy.h"
 
@@ -15,8 +15,7 @@ class DestroyRandom: public IDestroy
 public:
     DestroyRandom(const mat2i& distance);
     virtual ~DestroyRandom();
-
-    mat2i destroy(const mat2i& solution);
+    mat2i destroy(const mat2i& solution, int size);
 };
 
-#endif /* DESTROY_DESTROYRANDOM_H_ */
+#endif /* SRC_DESTROY_DESTROYRANDOM_H_ */
