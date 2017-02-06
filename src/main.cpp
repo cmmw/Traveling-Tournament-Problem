@@ -133,8 +133,7 @@ void testLNS(const char* instance)
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     Common::printMatrix(solution);
-    std::cout << instance << ": " << duration << "ms, ";
-    std::cout << Common::eval(solution, distance) << std::endl;
+    std::cout << instance << ": " << duration << "ms, " << Common::eval(solution, distance) << std::endl;
 }
 
 template<class T>

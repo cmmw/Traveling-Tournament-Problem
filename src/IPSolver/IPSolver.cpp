@@ -10,35 +10,50 @@
 #include <sstream>
 
 IPSolver::IPSolver(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance), m_model(m_env), m_cplex(m_model), m_objective(m_env), m_constraintArray(m_env)
 {
+    /*Set cplex parameters*/
+    setParams();
+    /*Build model*/
+    initModel();
 }
 
 IPSolver::~IPSolver()
 {
+    m_constraintArray.endElements();
+    m_objective.end();
+    m_cplex.end();
+    m_model.end();
+    m_env.end();
 }
 
 mat2i IPSolver::solve(const mat2i& solution)
 {
-    IloEnv env;
-    IloModel model(env);
-    IloCplex cplex(model);
 
-    /*Build model*/
+    /*Populate current solution*/
+    populatePartialSolution(solution);
 
+    m_cplex.exportModel("model.lp");
+
+    /*Solve*/
+    m_cplex.solve();
+    return convert();
+}
+
+void IPSolver::initModel()
+{
     //x_ijk means team i plays away against team j at round k
-    IloIntVar3 x;
     for (int i = 0; i < m_teams; i++)
     {
-        x.push_back(std::vector<std::vector<IloIntVar>>());
+        m_x.push_back(std::vector<std::vector<IloIntVar>>());
         for (int j = 0; j < m_teams; j++)
         {
-            x[i].push_back(std::vector<IloIntVar>());
+            m_x[i].push_back(std::vector<IloIntVar>());
             for (int k = 0; k < m_rounds; k++)
             {
                 std::stringstream ss;
                 ss << "x_" << i << "," << j << "," << k;
-                x[i][j].push_back(IloIntVar(env, 0, 1, ss.str().c_str()));
+                m_x[i][j].push_back(IloIntVar(m_env, 0, 1, ss.str().c_str()));
             }
         }
     }
@@ -48,7 +63,7 @@ mat2i IPSolver::solve(const mat2i& solution)
     {
         for (int k = 0; k < m_rounds; k++)
         {
-            model.add(x[i][i][k] == 0);
+            m_model.add(m_x[i][i][k] == 0);
         }
     }
 
@@ -57,12 +72,12 @@ mat2i IPSolver::solve(const mat2i& solution)
     {
         for (int k = 0; k < m_rounds; k++)
         {
-            IloExpr expr(env);
+            IloExpr expr(m_env);
             for (int j = 0; j < m_teams; j++)
             {
-                expr += x[i][j][k] + x[j][i][k];
+                expr += m_x[i][j][k] + m_x[j][i][k];
             }
-            model.add(expr == 1);
+            m_model.add(expr == 1);
             expr.end();
         }
     }
@@ -74,12 +89,12 @@ mat2i IPSolver::solve(const mat2i& solution)
         {
             if (i == j)
                 continue;
-            IloExpr expr(env);
+            IloExpr expr(m_env);
             for (int k = 0; k < m_rounds; k++)
             {
-                expr += x[i][j][k];
+                expr += m_x[i][j][k];
             }
-            model.add(expr == 1);
+            m_model.add(expr == 1);
             expr.end();
         }
     }
@@ -89,15 +104,15 @@ mat2i IPSolver::solve(const mat2i& solution)
     {
         for (int k = 0; k < m_rounds - 3; k++)
         {
-            IloExpr expr(env);
+            IloExpr expr(m_env);
             for (int l = 0; l < 4; l++)
             {
                 for (int j = 0; j < m_teams; j++)
                 {
-                    expr += x[i][j][k + l];
+                    expr += m_x[i][j][k + l];
                 }
             }
-            model.add(expr <= 3);
+            m_model.add(expr <= 3);
             expr.end();
         }
     }
@@ -107,15 +122,15 @@ mat2i IPSolver::solve(const mat2i& solution)
     {
         for (int k = 0; k < m_rounds - 3; k++)
         {
-            IloExpr expr(env);
+            IloExpr expr(m_env);
             for (int l = 0; l < 4; l++)
             {
                 for (int i = 0; i < m_teams; i++)
                 {
-                    expr += x[i][j][k + l];
+                    expr += m_x[i][j][k + l];
                 }
             }
-            model.add(expr <= 3);
+            m_model.add(expr <= 3);
             expr.end();
         }
     }
@@ -127,24 +142,23 @@ mat2i IPSolver::solve(const mat2i& solution)
         {
             for (int k = 0; k < m_rounds - 1; k++)
             {
-                model.add((x[i][j][k] + x[j][i][k] + x[i][j][k + 1] + x[j][i][k + 1]) <= 1);
+                m_model.add((m_x[i][j][k] + m_x[j][i][k] + m_x[i][j][k + 1] + m_x[j][i][k + 1]) <= 1);
             }
         }
     }
 
     //Helper variable z_ijk (team i is at venue j at round k)
-    IloIntVar3 z;
     for (int i = 0; i < m_teams; i++)
     {
-        z.push_back(std::vector<std::vector<IloIntVar>>());
+        m_z.push_back(std::vector<std::vector<IloIntVar>>());
         for (int j = 0; j < m_teams; j++)
         {
-            z[i].push_back(std::vector<IloIntVar>());
+            m_z[i].push_back(std::vector<IloIntVar>());
             for (int k = 0; k < m_rounds; k++)
             {
                 std::stringstream ss;
                 ss << "z_" << i << ", " << j << ", " << k;
-                z[i][j].push_back(IloIntVar(env, 0, 1, ss.str().c_str()));
+                m_z[i][j].push_back(IloIntVar(m_env, 0, 1, ss.str().c_str()));
             }
         }
     }
@@ -154,13 +168,13 @@ mat2i IPSolver::solve(const mat2i& solution)
 
         for (int k = 0; k < m_rounds; k++)
         {
-            IloExpr expr(env);
+            IloExpr expr(m_env);
             for (int j = 0; j < m_teams; j++)
             {
                 //bug in paper: (x[i][j][k] instead of x[j][i][k])
-                expr += x[j][i][k];
+                expr += m_x[j][i][k];
             }
-            model.add(z[i][i][k] == expr);
+            m_model.add(m_z[i][i][k] == expr);
             expr.end();
         }
     }
@@ -172,24 +186,23 @@ mat2i IPSolver::solve(const mat2i& solution)
             for (int k = 0; k < m_rounds; k++)
             {
                 if (i != j)
-                    model.add(z[i][j][k] == x[i][j][k]);
+                    m_model.add(m_z[i][j][k] == m_x[i][j][k]);
             }
         }
     }
 
     //Helper variable y_tij, team t travels from i to j anywhere in the schedule
-    IloIntVar3 y;
     for (int t = 0; t < m_teams; t++)
     {
-        y.push_back(std::vector<std::vector<IloIntVar>>());
+        m_y.push_back(std::vector<std::vector<IloIntVar>>());
         for (int i = 0; i < m_teams; i++)
         {
-            y[t].push_back(std::vector<IloIntVar>());
+            m_y[t].push_back(std::vector<IloIntVar>());
             for (int j = 0; j < m_teams; j++)
             {
                 std::stringstream ss;
                 ss << "y_" << t << ", " << i << ", " << j;
-                y[t][i].push_back(IloIntVar(env, 0, 1, ss.str().c_str()));
+                m_y[t][i].push_back(IloIntVar(m_env, 0, 1, ss.str().c_str()));
             }
         }
     }
@@ -202,22 +215,18 @@ mat2i IPSolver::solve(const mat2i& solution)
             {
                 for (int k = 0; k < m_rounds - 1; k++)
                 {
-                    model.add(y[t][i][j] >= (z[t][i][k] + z[t][j][k + 1] - 1));
+                    m_model.add(m_y[t][i][j] >= (m_z[t][i][k] + m_z[t][j][k + 1] - 1));
                 }
             }
         }
     }
 
-    /*Populate current solution*/
-    populatePartialSolution(solution, x, z, model);
-
     /*Objective function*/
-    IloExpr objective(env);
     for (int i = 0; i < m_teams; i++)
     {
         for (int j = 0; j < m_teams; j++)
         {
-            objective += m_distance[i][j] * x[i][j][0];
+            m_objective += m_distance[i][j] * m_x[i][j][0];
         }
     }
 
@@ -227,7 +236,7 @@ mat2i IPSolver::solve(const mat2i& solution)
         {
             for (int j = 0; j < m_teams; j++)
             {
-                objective += m_distance[i][j] * y[t][i][j];
+                m_objective += m_distance[i][j] * m_y[t][i][j];
             }
         }
     }
@@ -236,39 +245,24 @@ mat2i IPSolver::solve(const mat2i& solution)
     {
         for (int j = 0; j < m_teams; j++)
         {
-            objective += m_distance[j][i] * x[i][j][m_rounds - 1];
+            m_objective += m_distance[j][i] * m_x[i][j][m_rounds - 1];
         }
     }
 
-    model.add(IloMinimize(env, objective));
-    objective.end();
-
-    /*Set cplex parameters*/
-    setParams(cplex);
-    cplex.exportModel("model.lp");
-
-    /*Solve*/
-    cplex.solve();
-
-    mat2i sol = convert(x, cplex);
-
-    cplex.end();
-    model.end();
-    env.end();
-    return sol;
+    m_model.add(IloMinimize(m_env, m_objective));
 }
 
-void IPSolver::setParams(IloCplex& cplex)
+void IPSolver::setParams()
 {
 // print every x-th line of node-log and give more details
-    cplex.setParam(IloCplex::MIPInterval, 1000);
-    cplex.setParam(IloCplex::MIPDisplay, 2);
-    cplex.setWarning(cplex.getEnv().getNullStream());
-    cplex.setParam(IloCplex::Threads, 8);
-    cplex.setParam(IloCplex::TiLim, 60);
+    m_cplex.setParam(IloCplex::MIPInterval, 1000);
+    m_cplex.setParam(IloCplex::MIPDisplay, 0);
+    m_cplex.setWarning(m_cplex.getEnv().getNullStream());
+    m_cplex.setParam(IloCplex::Threads, 8);
+    m_cplex.setParam(IloCplex::TiLim, 60);
 }
 
-mat2i IPSolver::convert(const IloIntVar3& x, const IloCplex& cplex)
+mat2i IPSolver::convert()
 {
     mat2i sol;
     Common::initSolution(m_teams, sol);
@@ -279,7 +273,7 @@ mat2i IPSolver::convert(const IloIntVar3& x, const IloCplex& cplex)
         {
             for (int j = 0; j < m_teams; j++)
             {
-                if (cplex.getIntValue(x[i][j][r]) == 1)
+                if (m_cplex.getIntValue(m_x[i][j][r]) == 1)
                 {
                     if (sol[i][r] != 0 || sol[j][r] != 0)
                     {
@@ -295,10 +289,13 @@ mat2i IPSolver::convert(const IloIntVar3& x, const IloCplex& cplex)
     return sol;
 }
 
-void IPSolver::populatePartialSolution(const mat2i& sol, const IloIntVar3& x, const IloIntVar3& z, IloModel& model)
+void IPSolver::populatePartialSolution(const mat2i& sol)
 {
     if (sol.empty())
         return;
+
+    m_model.remove(m_constraintArray);
+    m_constraintArray.endElements();
 
     for (int t = 0; t < m_teams; t++)
     {
@@ -307,17 +304,22 @@ void IPSolver::populatePartialSolution(const mat2i& sol, const IloIntVar3& x, co
             int o = sol[t][r];
             if (o != 0)
             {
+                IloConstraint c1;
+                IloConstraint c2;
                 if (o < 0)
                 {
                     o = -o;
-                    model.add(z[t][o - 1][r] == 1);
-                    model.add(x[t][o - 1][r] == 1);
+                    c1 = m_z[t][o - 1][r] == 1;
+                    c2 = m_x[t][o - 1][r] == 1;
                 } else
                 {
-                    model.add(z[t][t][r] == 1);
-                    model.add(x[o - 1][t][r] == 1);
+                    c1 = m_z[t][t][r] == 1;
+                    c2 = m_x[o - 1][t][r] == 1;
                 }
+                m_constraintArray.add(c1);
+                m_constraintArray.add(c2);
             }
         }
     }
+    m_model.add(m_constraintArray);
 }

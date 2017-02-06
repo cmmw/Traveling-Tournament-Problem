@@ -17,7 +17,7 @@
 #include <typeindex>
 
 LNS::LNS(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance), m_destroyLb(10), m_destroyUb(40), m_solver(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance), m_destroyLb(10), m_destroyUb(50), m_solver(distance)
 {
     m_destroyMethods.push_back(new DestroyColumns(m_distance));
     m_destroyMethods.push_back(new DestroyRows(m_distance));
@@ -38,7 +38,8 @@ mat2i LNS::solve(const mat2i& solution)
     mat2i bestSol = currentSol;
     int bestVal = Common::eval(bestSol, m_distance);
     int currentVal = bestVal;
-    int destroySize = 30;
+    int destroySize = 20;
+    int lastIncrement = 0;
     for (int i = 0; i < 1000; i++)
     {
         int method = std::rand() % m_destroyMethods.size();
@@ -54,13 +55,23 @@ mat2i LNS::solve(const mat2i& solution)
             bestSol = optSol;
             bestVal = optVal;
             std::cout << bestVal << std::endl;
-            i = 0;
         }
 
         if (accept(optVal, currentVal))
         {
             currentSol = optSol;
             currentVal = optVal;
+            i = 0;
+            destroySize = m_destroyLb;
+            lastIncrement = 0;
+        } else
+        {
+            lastIncrement++;
+            if (lastIncrement >= 20)
+            {
+                destroySize = std::min(destroySize + 5, m_destroyUb);
+                lastIncrement = 0;
+            }
         }
     }
     printStatistics();
@@ -69,7 +80,7 @@ mat2i LNS::solve(const mat2i& solution)
 
 mat2i LNS::destroy(const mat2i& solution, int method, int destroySize)
 {
-    std::cout << typeid(*m_destroyMethods[method]).name() << ", size: " << destroySize << std::endl;
+    std::cout << typeid(*m_destroyMethods[method]).name() << ", size: " << destroySize << "%" << std::endl;
     return m_destroyMethods[method]->destroy(solution, destroySize);
 }
 
