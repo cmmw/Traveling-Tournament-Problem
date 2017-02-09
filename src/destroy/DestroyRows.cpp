@@ -15,6 +15,8 @@
 DestroyRows::DestroyRows(const mat2i& distance) :
         IDestroy(distance)
 {
+    int x = std::round((2 * m_teams + m_rounds + 2) / 8.0f);
+    m_maxSize = 2 * x * m_teams - 4 * x * x + m_rounds * x + 2 * x;
 }
 
 DestroyRows::~DestroyRows()
@@ -34,6 +36,8 @@ mat2i DestroyRows::destroy(const mat2i& solution, int size)
     //calculate the number of rows and teams to delete so that 'size'% of the entries are delete
     //there are two solutions for that equation, choose one randomly
     float s = m_teams * m_rounds * size / 100.0;       //number of entries to delete
+    if (s > m_maxSize)
+        s = m_maxSize;
     float y = m_teams + m_rounds / 2.0f + 1;
     float x1 = ((y / 2.0f) + std::sqrt(std::pow(y, 2.0f) / 4.0f - s)) / 2.0f;
     float x2 = ((y / 2.0f) - std::sqrt(std::pow(y, 2.0f) / 4.0f - s)) / 2.0f;

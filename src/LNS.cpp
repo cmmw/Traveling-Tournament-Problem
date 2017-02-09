@@ -38,9 +38,9 @@ mat2i LNS::solve(const mat2i& solution)
     mat2i bestSol = currentSol;
     int bestVal = Common::eval(bestSol, m_distance);
     int currentVal = bestVal;
-    int destroySize = 20;
+    int destroySize = m_destroyLb;
     int lastIncrement = 0;
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 300; i++)
     {
         int method = std::rand() % m_destroyMethods.size();
         mat2i partialSol = destroy(currentSol, method, destroySize);
@@ -55,12 +55,6 @@ mat2i LNS::solve(const mat2i& solution)
             bestSol = optSol;
             bestVal = optVal;
             std::cout << bestVal << std::endl;
-        }
-
-        if (accept(optVal, currentVal))
-        {
-            currentSol = optSol;
-            currentVal = optVal;
             i = 0;
             destroySize = m_destroyLb;
             lastIncrement = 0;
@@ -73,6 +67,12 @@ mat2i LNS::solve(const mat2i& solution)
                 lastIncrement = 0;
             }
         }
+
+        if (accept(optVal, currentVal))
+        {
+            currentSol = optSol;
+            currentVal = optVal;
+        }
     }
     printStatistics();
     return bestSol;
@@ -81,7 +81,9 @@ mat2i LNS::solve(const mat2i& solution)
 mat2i LNS::destroy(const mat2i& solution, int method, int destroySize)
 {
     std::cout << typeid(*m_destroyMethods[method]).name() << ", size: " << destroySize << "%" << std::endl;
-    return m_destroyMethods[method]->destroy(solution, destroySize);
+    auto s = m_destroyMethods[method]->destroy(solution, destroySize);
+    Common::printMatrix(s);
+    return s;
 }
 
 bool LNS::accept(int optVal, int currentVal)
