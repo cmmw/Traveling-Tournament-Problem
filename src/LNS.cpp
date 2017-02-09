@@ -81,9 +81,7 @@ mat2i LNS::solve(const mat2i& solution)
 mat2i LNS::destroy(const mat2i& solution, int method, int destroySize)
 {
     std::cout << typeid(*m_destroyMethods[method]).name() << ", size: " << destroySize << "%" << std::endl;
-    auto s = m_destroyMethods[method]->destroy(solution, destroySize);
-    Common::printMatrix(s);
-    return s;
+    return m_destroyMethods[method]->destroy(solution, destroySize);
 }
 
 bool LNS::accept(int optVal, int currentVal)
