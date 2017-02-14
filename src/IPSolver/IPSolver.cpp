@@ -27,17 +27,21 @@ IPSolver::~IPSolver()
     m_env.end();
 }
 
-mat2i IPSolver::solve(const mat2i& solution)
+mat2i IPSolver::solve()
 {
-
-    /*Populate current solution*/
-    populatePartialSolution(solution);
-
     m_cplex.exportModel("model.lp");
 
     /*Solve*/
     m_cplex.solve();
-    return convert();
+
+    /*Convert model to solution in mat2i format*/
+    mat2i solution = convert();
+
+    /*Delete constraints*/
+    m_model.remove(m_constraintArray);
+    m_constraintArray.endElements();
+
+    return solution;
 }
 
 void IPSolver::initModel()
@@ -259,7 +263,7 @@ void IPSolver::setParams()
     m_cplex.setParam(IloCplex::MIPDisplay, 0);
     m_cplex.setWarning(m_cplex.getEnv().getNullStream());
     m_cplex.setParam(IloCplex::Threads, 8);
-    m_cplex.setParam(IloCplex::TiLim, 60);
+    m_cplex.setParam(IloCplex::TiLim, 10);
 }
 
 mat2i IPSolver::convert()
@@ -294,9 +298,6 @@ void IPSolver::populatePartialSolution(const mat2i& sol)
     if (sol.empty())
         return;
 
-    m_model.remove(m_constraintArray);
-    m_constraintArray.endElements();
-
     for (int t = 0; t < m_teams; t++)
     {
         for (int r = 0; r < m_rounds; r++)
@@ -304,6 +305,7 @@ void IPSolver::populatePartialSolution(const mat2i& sol)
             int o = sol[t][r];
             if (o != 0)
             {
+                //Optimize partial solution
                 IloConstraint c1;
                 IloConstraint c2;
                 if (o < 0)
@@ -316,6 +318,71 @@ void IPSolver::populatePartialSolution(const mat2i& sol)
                     c1 = m_z[t][t][r] == 1;
                     c2 = m_x[o - 1][t][r] == 1;
                 }
+                m_constraintArray.add(c1);
+                m_constraintArray.add(c2);
+
+            }
+        }
+    }
+    m_model.add(m_constraintArray);
+}
+
+void IPSolver::relaxHomeAwayPattern(const mat2i& sol)
+{
+    if (sol.empty())
+        return;
+
+    for (int t = 0; t < m_teams; t++)
+    {
+        for (int r = 0; r < m_rounds; r++)
+        {
+            int o = sol[t][r];
+            if (o != 0)
+            {
+                //Optimize Home/Away-Pattern
+                IloConstraint c;
+                c = ((m_x[t][std::abs(o) - 1][r] + m_x[std::abs(o) - 1][t][r]) == 1);
+                m_constraintArray.add(c);
+            }
+        }
+    }
+    m_model.add(m_constraintArray);
+}
+
+void IPSolver::relaxVenues(const mat2i& sol)
+{
+    if (sol.empty())
+        return;
+
+    for (int t = 0; t < m_teams; t++)
+    {
+        for (int r = 0; r < m_rounds; r++)
+        {
+            int o = sol[t][r];
+            if (o != 0)
+            {
+                //Optimize venues
+                IloExpr sum1(m_env);
+                IloConstraint c1;
+                IloExpr sum2(m_env);
+                IloConstraint c2;
+
+                for (int i = 0; i < m_teams; i++)
+                {
+                    if (o < 0)
+                    {
+                        sum1 += m_x[i][std::abs(o) - 1][r];
+                        sum2 += m_x[t][i][r];
+                    } else
+                    {
+                        sum1 += m_x[o - 1][i][r];
+                        sum2 += m_x[i][t][r];
+                    }
+                }
+
+                c1 = (sum1 == 1);
+                c2 = (sum2 == 1);
+
                 m_constraintArray.add(c1);
                 m_constraintArray.add(c2);
             }

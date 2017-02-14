@@ -13,7 +13,7 @@
 class DestroyColumns: public IDestroy
 {
 public:
-    DestroyColumns(const mat2i& distance);
+    DestroyColumns(const mat2i& distance, IPSolver& solver);
     virtual ~DestroyColumns();
     mat2i destroy(const mat2i& solution, int size);
 

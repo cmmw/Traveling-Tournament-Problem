@@ -12,8 +12,8 @@
 #include <iostream>
 #include <random>
 
-DestroyTeams::DestroyTeams(const mat2i& distance) :
-        IDestroy(distance)
+DestroyTeams::DestroyTeams(const mat2i& distance, IPSolver& solver) :
+        IDestroy(distance, solver)
 {
 }
 
@@ -38,7 +38,7 @@ mat2i DestroyTeams::destroy(const mat2i& solution, int size)
     if (size < 2)
         size = 2;
 
-    std::cout << "destroy " << size << " teams" << std::endl;
+//    std::cout << "destroy " << size << " teams" << std::endl;
     std::vector<int> selected;
     for (int i = 0; i < size; i++)
     {
@@ -60,6 +60,7 @@ mat2i DestroyTeams::destroy(const mat2i& solution, int size)
                 destroyed[t][r] = 0;
         }
     }
+    m_solver.populatePartialSolution(destroyed);
     return destroyed;
 }
 

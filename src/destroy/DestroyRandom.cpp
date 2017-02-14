@@ -9,8 +9,8 @@
 #include <algorithm>
 #include <iostream>
 
-DestroyRandom::DestroyRandom(const mat2i& distance) :
-        IDestroy(distance)
+DestroyRandom::DestroyRandom(const mat2i& distance, IPSolver& solver) :
+        IDestroy(distance, solver)
 {
 }
 
@@ -34,7 +34,7 @@ mat2i DestroyRandom::destroy(const mat2i& solution, int size)
     std::random_shuffle(vars.begin(), vars.end());
     float s = size * m_teams * m_rounds / 100.0f;
     size = std::round(s);
-    std::cout << "destroy " << size << " entries" << std::endl;
+//    std::cout << "destroy " << size << " entries" << std::endl;
     for (int i = 0; i < size; i++)
     {
         int t = vars[i].first;
@@ -46,5 +46,6 @@ mat2i DestroyRandom::destroy(const mat2i& solution, int size)
         }
     }
 
+    m_solver.populatePartialSolution(destroyed);
     return destroyed;
 }

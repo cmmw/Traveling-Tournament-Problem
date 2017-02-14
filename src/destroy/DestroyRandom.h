@@ -13,7 +13,7 @@
 class DestroyRandom: public IDestroy
 {
 public:
-    DestroyRandom(const mat2i& distance);
+    DestroyRandom(const mat2i& distance, IPSolver& solver);
     virtual ~DestroyRandom();
     mat2i destroy(const mat2i& solution, int size);
 };

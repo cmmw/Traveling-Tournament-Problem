@@ -13,7 +13,7 @@
 class DestroyTeams: public IDestroy
 {
 public:
-    DestroyTeams(const mat2i& distance);
+    DestroyTeams(const mat2i& distance, IPSolver& solver);
     virtual ~DestroyTeams();
     mat2i destroy(const mat2i& solution, int size);
 

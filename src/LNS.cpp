@@ -11,18 +11,22 @@
 #include "destroy/DestroyRows.h"
 #include "destroy/DestroyTeams.h"
 #include "destroy/DestroyRandom.h"
+#include "destroy/DestroyHomeAwayPattern.h"
+#include "destroy/DestroyVenues.h"
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
 #include <typeindex>
 
 LNS::LNS(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance), m_destroyLb(10), m_destroyUb(50), m_solver(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance), m_destroyLb(20), m_destroyUb(55), m_solver(distance)
 {
-    m_destroyMethods.push_back(new DestroyColumns(m_distance));
-    m_destroyMethods.push_back(new DestroyRows(m_distance));
-    m_destroyMethods.push_back(new DestroyTeams(m_distance));
-    m_destroyMethods.push_back(new DestroyRandom(m_distance));
+    m_destroyMethods.push_back(new DestroyColumns(m_distance, m_solver));
+    m_destroyMethods.push_back(new DestroyRows(m_distance, m_solver));
+    m_destroyMethods.push_back(new DestroyTeams(m_distance, m_solver));
+    m_destroyMethods.push_back(new DestroyRandom(m_distance, m_solver));
+    m_destroyMethods.push_back(new DestroyHomeAwayPattern(m_distance, m_solver));
+    m_destroyMethods.push_back(new DestroyVenues(m_distance, m_solver));
 
     m_destroyMethodsUsed.resize(m_destroyMethods.size());
     m_destroyMethodsImproved.resize(m_destroyMethods.size());
@@ -40,11 +44,11 @@ mat2i LNS::solve(const mat2i& solution)
     int currentVal = bestVal;
     int destroySize = m_destroyLb;
     int lastIncrement = 0;
-    for (int i = 0; i < 300; i++)
+    for (int i = 0; i < 235; i++)
     {
         int method = std::rand() % m_destroyMethods.size();
-        mat2i partialSol = destroy(currentSol, method, destroySize);
-        mat2i optSol = m_solver.solve(partialSol);
+        destroy(currentSol, method, destroySize);
+        mat2i optSol = m_solver.solve();
         int optVal = Common::eval(optSol, m_distance);
 
         m_destroyMethodsUsed[method]++;
@@ -72,16 +76,18 @@ mat2i LNS::solve(const mat2i& solution)
         {
             currentSol = optSol;
             currentVal = optVal;
+            Common::printMatrix(currentSol);
         }
     }
     printStatistics();
     return bestSol;
 }
 
-mat2i LNS::destroy(const mat2i& solution, int method, int destroySize)
+void LNS::destroy(const mat2i& solution, int method, int destroySize)
 {
     std::cout << typeid(*m_destroyMethods[method]).name() << ", size: " << destroySize << "%" << std::endl;
-    return m_destroyMethods[method]->destroy(solution, destroySize);
+    auto s = m_destroyMethods[method]->destroy(solution, destroySize);
+//    Common::printMatrix(s);
 }
 
 bool LNS::accept(int optVal, int currentVal)

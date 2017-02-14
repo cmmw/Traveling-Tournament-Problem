@@ -12,11 +12,9 @@
 #include <iostream>
 #include <random>
 
-DestroyRows::DestroyRows(const mat2i& distance) :
-        IDestroy(distance)
+DestroyRows::DestroyRows(const mat2i& distance, IPSolver& solver) :
+        IDestroy(distance, solver)
 {
-    int x = std::round((2 * m_teams + m_rounds + 2) / 8.0f);
-    m_maxSize = 2 * x * m_teams - 4 * x * x + m_rounds * x + 2 * x;
 }
 
 DestroyRows::~DestroyRows()
@@ -35,23 +33,24 @@ mat2i DestroyRows::destroy(const mat2i& solution, int size)
 
     //calculate the number of rows and teams to delete so that 'size'% of the entries are delete
     //there are two solutions for that equation, choose one randomly
-    float s = m_teams * m_rounds * size / 100.0;       //number of entries to delete
-    if (s > m_maxSize)
-        s = m_maxSize;
-    float y = m_teams + m_rounds / 2.0f + 1;
-    float x1 = ((y / 2.0f) + std::sqrt(std::pow(y, 2.0f) / 4.0f - s)) / 2.0f;
-    float x2 = ((y / 2.0f) - std::sqrt(std::pow(y, 2.0f) / 4.0f - s)) / 2.0f;
+//    float c = m_teams * m_rounds * size / 100.f;       //number of entries to delete
+//    float y = (2 * m_teams + m_rounds) / 4.f;
+//    int x1 = std::round(y + std::sqrt(std::pow(y, 2.0f) - (c / 2.f)));
+//    int x2 = std::round(y - std::sqrt(std::pow(y, 2.0f) - (c / 2.f)));
+//
+//    if (x1 > m_teams)
+//        x1 = x2;
+//
+//    if (std::rand() % 2 == 0)
+//        size = x1;
+//    else
+//        size = x2;
+//
+//    if (size < 2)
+//        size = 2;
 
-    if (std::rand() % 2 == 0)
-        s = x1;
-    else
-        s = x2;
-
-    size = std::round(s);
-    if (size < 2)
-        size = 2;
-
-    std::cout << "destroy " << size << " rows+teams" << std::endl;
+    size = m_teams * size / 100.f;
+//    std::cout << "destroy " << size << " rows+teams" << std::endl;
     std::vector<int> selected;
     for (int i = 0; i < size; i++)
     {
@@ -63,7 +62,7 @@ mat2i DestroyRows::destroy(const mat2i& solution, int size)
         teams.erase(teams.begin() + tIdx);
     }
 
-    //swap teams: remove all entries in row t1, t2 (n >= 2) expect the ones where they play against each other and in all other cells remove the entries containing t1 or t2
+    //swap teams: remove all entries in row t1, t2 (n >= 2)and in all other cells remove the entries containing t1 or t2
     for (int t = 0; t < m_teams; t++)
     {
         for (int r = 0; r < m_rounds; r++)
@@ -73,16 +72,14 @@ mat2i DestroyRows::destroy(const mat2i& solution, int size)
 
             if (std::find(selected.begin(), selected.end(), t + 1) != selected.end())
             {
-                if (std::find(selected.begin(), selected.end(), absEntry) == selected.end())
-                {
-                    entry = 0;
-                }
+                entry = 0;
             } else if (std::find(selected.begin(), selected.end(), absEntry) != selected.end())
             {
                 entry = 0;
             }
         }
     }
+    m_solver.populatePartialSolution(destroyed);
     return destroyed;
 }
 

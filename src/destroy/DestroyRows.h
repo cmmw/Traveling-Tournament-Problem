@@ -13,12 +13,11 @@
 class DestroyRows: public IDestroy
 {
 public:
-    DestroyRows(const mat2i& distance);
+    DestroyRows(const mat2i& distance, IPSolver& solver);
     virtual ~DestroyRows();
     mat2i destroy(const mat2i& solution, int size);
 
 private:
-    int m_maxSize;
     std::vector<int> teamDistance(const mat2i& solution);
 };
 

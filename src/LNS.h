@@ -32,7 +32,7 @@ private:
     std::vector<int> m_destroyMethodsUsed;
     std::vector<int> m_destroyMethodsImproved;
 
-    mat2i destroy(const mat2i& solution, int method, int destroySize);
+    void destroy(const mat2i& solution, int method, int destroySize);
     bool accept(int optVal, int currentVal);
     void printStatistics();
 };

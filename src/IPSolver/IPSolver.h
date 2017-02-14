@@ -19,10 +19,12 @@ public:
     IPSolver(const mat2i& distance);
     virtual ~IPSolver();
 
-    mat2i solve(const mat2i& solution);
+    mat2i solve();
+    void populatePartialSolution(const mat2i& sol);
+    void relaxHomeAwayPattern(const mat2i& sol);
+    void relaxVenues(const mat2i& sol);
 
 private:
-
     typedef std::vector<std::vector<IloIntVar>> IloIntVar2;
     typedef std::vector<IloIntVar2> IloIntVar3;
 
@@ -45,8 +47,6 @@ private:
     void initModel();
     void setParams();
     mat2i convert();
-    void populatePartialSolution(const mat2i& sol);
-
 };
 
 #endif /* SRC_IPSOLVER_IPSOLVER_H_ */

@@ -11,8 +11,8 @@
 #include <algorithm>
 #include <random>
 #include <iostream>
-DestroyColumns::DestroyColumns(const mat2i& distance) :
-        IDestroy(distance)
+DestroyColumns::DestroyColumns(const mat2i& distance, IPSolver& solver) :
+        IDestroy(distance, solver)
 {
 }
 
@@ -34,7 +34,7 @@ mat2i DestroyColumns::destroy(const mat2i& solution, int size)
     size = std::round(s);
     if (size < 2)
         size = 2;
-    std::cout << "destroy " << size << " columns" << std::endl;
+//    std::cout << "destroy " << size << " columns" << std::endl;
     std::vector<int> selected;
     for (int i = 0; i < size; i++)
     {
@@ -52,6 +52,7 @@ mat2i DestroyColumns::destroy(const mat2i& solution, int size)
         for (int r : selected)
             destroyed[t][r] = 0;
     }
+    m_solver.populatePartialSolution(destroyed);
     return destroyed;
 }
 
