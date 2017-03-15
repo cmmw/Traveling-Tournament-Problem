@@ -9,13 +9,14 @@
 #include "LNS.h"
 #include "Factorization.h"
 #include "Common.h"
+#include "IPSolver/IPSolver.h"
+#include "LocalSearch/HillClimber.h"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
 #include <sstream>
-#include "IPSolver/IPSolver.h"
 
 mat2i readInstance(const char* instance);
 template<class T>
@@ -26,15 +27,17 @@ template<class T>
 void testLNS(const char* instance);
 template<class T>
 mat2i callSolver(T& solver);
+void testHillClimber(const char* instance);
 
 const char* instances[] =
-        { "instances/data4.txt", "instances/data8.txt", "instances/data10.txt", "instances/data12.txt", "instances/data14.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
+{ "instances/data4.txt", "instances/data8.txt", "instances/data10.txt", "instances/data12.txt", "instances/data14.txt", "instances/data16.txt", "instances/nfl18.txt", "instances/nfl20.txt", "instances/nfl22.txt", "instances/nfl24.txt", "instances/nfl26.txt", "instances/nfl28.txt", "instances/nfl30.txt", "instances/nfl32.txt", "instances/galaxy34.txt", "instances/galaxy36.txt", "instances/galaxy38.txt", "instances/galaxy40.txt" };
 
 int main()
 {
     srand(time(nullptr));
 
-    testLNS<Factorization>("instances/data16.txt");
+    testHillClimber("instances/data16.txt");
+//    testLNS<Factorization>("instances/data16.txt");
 //    test<IPSolver>("instances/data4.txt");
 //    test<Factorization>("instances/data4.txt");
 //    benchmark<IPSolver>();
@@ -147,4 +150,19 @@ template<>
 mat2i callSolver(Factorization& solver)
 {
     return solver.solve();
+}
+
+inline void testHillClimber(const char* instance)
+{
+    mat2i distance = readInstance(instance);
+    Factorization f(distance);
+    mat2i initSolution = f.solve();
+
+    HillClimber climber(initSolution, distance);
+    auto start = std::chrono::high_resolution_clock::now();
+    mat2i solution = climber.solve();
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    Common::printMatrix(solution);
+    std::cout << instance << ": " << duration << "ms, " << Common::eval(solution, distance) << " (initial solution: " << Common::eval(initSolution, distance) << ")" << std::endl;
 }
