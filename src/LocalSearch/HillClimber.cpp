@@ -14,7 +14,7 @@
 HillClimber::HillClimber(const mat2i& solution, const mat2i& distance) :
         m_teams(solution.size()), m_rounds(m_teams * 2 - 2), m_findBestImprovement(false), m_solution(solution), m_distance(distance)
 {
-//    m_neighborhoods.push_back(&HillClimber::swapHomes);
+    m_neighborhoods.push_back(&HillClimber::swapHomes);
     m_neighborhoods.push_back(&HillClimber::swapRounds);
     m_neighborhoods.push_back(&HillClimber::swapTeams);
     m_neighborhoods.push_back(&HillClimber::swapPartialRounds);
@@ -36,10 +36,11 @@ mat2i HillClimber::solve()
         //For all neighborhoods
         for (swapFunc f : m_neighborhoods)
         {
-            run = run || (this->*f)(solution, distance);
+            run = (this->*f)(solution, distance) || run;
             if (!m_findBestImprovement && run)
                 break;
         }
+        std::cout << distance << std::endl;
         if (run)
             m_solution = solution;
     }
@@ -85,8 +86,6 @@ bool HillClimber::swapHomes(mat2i& solution, int& distance)
                 int distTmp = Common::eval(m_solution, m_distance);
                 if (distTmp < distance)
                 {
-                    Common::printMatrix(m_solution);
-                    std::cout << "sh---" << std::endl;
                     improved = true;
                     distance = distTmp;
                     solution = m_solution;
@@ -143,8 +142,6 @@ bool HillClimber::swapRounds(mat2i& solution, int& distance)
                 int distTmp = Common::eval(m_solution, m_distance);
                 if (distTmp < distance)
                 {
-                    Common::printMatrix(m_solution);
-                    std::cout << "sr---" << std::endl;
                     improved = true;
                     distance = distTmp;
                     solution = m_solution;
@@ -207,10 +204,6 @@ bool HillClimber::swapTeams(mat2i& solution, int& distance)
                 int distTmp = Common::eval(m_solution, m_distance);
                 if (distTmp < distance)
                 {
-                    std::cout << "***" << std::endl;
-                    std::cout << t1 << ", " << t2 << std::endl;
-                    Common::printMatrix(m_solution);
-                    std::cout << "st---" << std::endl;
                     improved = true;
                     distance = distTmp;
                     solution = m_solution;
@@ -293,8 +286,6 @@ bool HillClimber::swapPartialRounds(mat2i& solution, int& distance)
                     int distTmp = Common::eval(m_solution, m_distance);
                     if (distTmp < distance)
                     {
-                        Common::printMatrix(m_solution);
-                        std::cout << "spr---" << std::endl;
                         improved = true;
                         distance = distTmp;
                         solution = m_solution;
@@ -329,9 +320,7 @@ bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
                 inRound[t][o - 1] = r;
         }
     }
-    std::cout << "instance: " << std::endl;
-    Common::printMatrix(m_solution);
-    std::cout << "**" << std::endl;
+
     bool improved = false;
     for (int t1 = 0; t1 < m_teams - 1; t1++)
     {
@@ -358,8 +347,6 @@ bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
                     if (rr < 0)
                     {
                         std::cout << t1 << ", " << t2 << ", " << r << std::endl;
-                        Common::printMatrix(m_solution);
-                        std::cout << "jlsdafjlaksdf" << std::endl;
                     }
                     if (std::find(roundsToSwap.begin(), roundsToSwap.end(), rr) != roundsToSwap.end())
                         break;
@@ -400,10 +387,6 @@ bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
                     int distTmp = Common::eval(m_solution, m_distance);
                     if (distTmp < distance)
                     {
-                        std::cout << "imporved" << std::endl;
-                        std::cout << t1 << ", " << t2 << ", " << r << std::endl;
-                        Common::printMatrix(m_solution);
-                        std::cout << "spt--- " << std::endl;
                         improved = true;
                         distance = distTmp;
                         solution = m_solution;
@@ -425,4 +408,9 @@ bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
         }
     }
     return improved;
+}
+
+bool HillClimber::checkSolution(mat2i& solution, const std::vector<std::pair<int, int>>& cells)
+{
+
 }
