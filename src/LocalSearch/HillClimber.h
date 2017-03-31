@@ -40,7 +40,7 @@ private:
     bool swapPartialRounds(mat2i& solution, int& distance);
     bool swapPartialTeams(mat2i& solution, int& distance);
     //Check constraints and set solution to new solution if it is better
-    bool checkSolution(mat2i& solution, const std::vector<std::pair<int, int>>& cells);
+    bool checkSolution(mat2i& solution, int& distance, const std::vector<std::pair<int, int>>& cells);
 };
 
 #endif /* SRC_LOCALSEARCH_HILLCLIMBER_H_ */
