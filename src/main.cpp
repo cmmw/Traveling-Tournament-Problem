@@ -36,8 +36,8 @@ int main()
 {
     srand(time(nullptr));
 
-    testHillClimber("instances/data16.txt");
-//    testLNS<Factorization>("instances/data16.txt");
+//    testHillClimber("instances/data16.txt");
+    testLNS<Factorization>("instances/data12.txt");
 //    test<IPSolver>("instances/data4.txt");
 //    test<Factorization>("instances/data4.txt");
 //    benchmark<IPSolver>();

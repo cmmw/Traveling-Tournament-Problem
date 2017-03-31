@@ -13,6 +13,7 @@
 #include "destroy/DestroyRandom.h"
 #include "destroy/DestroyHomeAwayPattern.h"
 #include "destroy/DestroyVenues.h"
+#include "LocalSearch/HillClimber.h"
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
@@ -56,7 +57,10 @@ mat2i LNS::solve(const mat2i& solution)
         if (optVal < bestVal)
         {
             m_destroyMethodsImproved[method]++;
-            bestSol = optSol;
+
+            HillClimber climber(optSol, m_distance);
+            bestSol = climber.solve();
+            optVal = Common::eval(bestSol, m_distance);
             bestVal = optVal;
             std::cout << bestVal << std::endl;
             i = 0;
