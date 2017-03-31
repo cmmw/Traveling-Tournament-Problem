@@ -27,6 +27,7 @@ public:
     static int getDistance(const mat2i& distance, int teamIdx, int t1, int t2);
     static mat2i calcTravelMap(const mat2i& solution);
     static int deltaDistance(int team, int round, int val, const mat2i& solution, const mat2i& distance);
+    static int deltaDistance(int team, int round, const mat2i& solution, const mat2i& distance);
     static int deltaTrips(int team, int round, int val, const mat2i& solution);
     //Returns the length of the home or away sequence at team, round
     static int atMost(int team, int round, const mat2i& solution);

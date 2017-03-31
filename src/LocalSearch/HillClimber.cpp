@@ -49,6 +49,19 @@ mat2i HillClimber::solve()
 
 bool HillClimber::swapHomes(mat2i& solution, int& distance)
 {
+    //inRund[0][1] = 2 means team 0 plays at home against team 1 in round 2
+    //-1 means no such game exists in the current plan
+    mat2i inRound(m_teams, std::vector<int>(m_teams, -1));
+    for (int t = 0; t < m_teams; t++)
+    {
+        for (int r = 0; r < m_rounds; r++)
+        {
+            int o = m_solution[t][r];
+            if (o > 0)
+                inRound[t][o - 1] = r;
+        }
+    }
+
     bool improved = false;
     mat2i cpy = m_solution;
     for (int t = 0; t < m_teams; t++)
@@ -63,13 +76,7 @@ bool HillClimber::swapHomes(mat2i& solution, int& distance)
             int& c2 = m_solution[otherTeam][r];
 
             //Search the round of the opposite game
-            int r2 = 0;
-            while (true)
-            {
-                if (-c1 == m_solution[t][r2])
-                    break;
-                r2++;
-            }
+            int r2 = (c1 < 0) ? inRound[t][-(c1 + 1)] : inRound[c1 - 1][t];
 
             //Move
             int& cc1 = m_solution[t][r2];

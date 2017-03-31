@@ -198,6 +198,11 @@ int Common::deltaDistance(int team, int round, int val, const mat2i& solution, c
     return d;
 }
 
+int Common::deltaDistance(int team, int round, const mat2i& solution, const mat2i& distance)
+{
+    return deltaDistance(team, round, solution[team][round], solution, distance);
+}
+
 int Common::deltaTrips(int team, int round, int val, const mat2i& solution)
 {
     int left = team + 1, right = team + 1;
