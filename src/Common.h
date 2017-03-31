@@ -28,6 +28,11 @@ public:
     static mat2i calcTravelMap(const mat2i& solution);
     static int deltaDistance(int team, int round, int val, const mat2i& solution, const mat2i& distance);
     static int deltaTrips(int team, int round, int val, const mat2i& solution);
+    //Returns the length of the home or away sequence at team, round
+    static int atMost(int team, int round, const mat2i& solution);
+    //Returns false if there is a repeating game
+    static int noRepeat(int team, int round, const mat2i& solution);
+    static void swapSigns(int& c1, int& c2);
 };
 
 #endif /* COMMON_H_ */

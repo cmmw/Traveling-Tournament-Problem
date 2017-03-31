@@ -217,3 +217,40 @@ int Common::deltaTrips(int team, int round, int val, const mat2i& solution)
 
     return trips;
 }
+
+int Common::atMost(int team, int round, const mat2i& solution)
+{
+    int sign = std::signbit(solution[team][round]);
+    int atMost = 1;
+    int r = round - 1;
+    while (r >= 0 && std::signbit(solution[team][r--]) == sign)
+        atMost++;
+    r = round + 1;
+    while (r < (int) solution[team].size() && std::signbit(solution[team][r++]) == sign)
+        atMost++;
+    return atMost;
+}
+
+int Common::noRepeat(int team, int round, const mat2i& solution)
+{
+    int t = std::abs(solution[team][round]);
+    if (round > 0)
+        if (std::abs(solution[team][round - 1]) == t)
+            return false;
+    if (round < (int) solution[team].size() - 1)
+        if (std::abs(solution[team][round + 1]) == t)
+            return false;
+    return true;
+}
+
+void Common::swapSigns(int& c1, int& c2)
+{
+    bool s1 = std::signbit(c1);
+    bool s2 = std::signbit(c2);
+
+    if (s1 == s2)
+        return;
+
+    c1 = -c1;
+    c2 = -c2;
+}

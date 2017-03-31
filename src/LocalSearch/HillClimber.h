@@ -19,14 +19,26 @@ public:
     mat2i solve();
 
 private:
+
+    typedef bool (HillClimber::*swapFunc)(mat2i& solution, int& distance);
+
     int m_teams;
     int m_rounds;
+    //Hill climber parameters
+    bool m_findBestImprovement;
     mat2i m_solution;
     mat2i m_distance;
+    std::vector<swapFunc> m_neighborhoods;
 
-    //Neighborhoods: Input/Output parameters solution and distance may be modified
-    void swapHomes(mat2i& solution, int& distance);
-
+    //Neighborhoods:
+    // solution - output parameter, if true is returned, this value will be set to the found solution, otherwise it is not changed
+    // distance - input/output parameter, input is the value of the current best solution, output the value of the found solution if return value is true
+    // returns true if a better solution was found
+    bool swapHomes(mat2i& solution, int& distance);
+    bool swapRounds(mat2i& solution, int& distance);
+    bool swapTeams(mat2i& solution, int& distance);
+    bool swapPartialRounds(mat2i& solution, int& distance);
+    bool swapPartialTeams(mat2i& solution, int& distance);
 };
 
 #endif /* SRC_LOCALSEARCH_HILLCLIMBER_H_ */
