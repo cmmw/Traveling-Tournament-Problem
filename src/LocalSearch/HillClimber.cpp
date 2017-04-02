@@ -54,53 +54,38 @@ mat2i HillClimber::solve()
 bool HillClimber::swapHomes(mat2i& solution, int& distance)
 {
     bool improved = false;
-    mat2i cpy = m_solution;
-    for (int t = 0; t < m_teams; t++)
+    for (int t1 = 0; t1 < m_teams - 1; t1++)
     {
-        for (int r = 0; r < m_rounds; r++)
+        for (int t2 = t1 + 1; t2 < m_teams; t2++)
         {
-            if (cpy[t][r] == 0)
-                continue;
+            int r1 = m_inRound[t1][t2];
+            int r2 = m_inRound[t2][t1];
 
-            int& c1 = m_solution[t][r];
-            int otherTeam = std::abs(c1) - 1;
-            int& c2 = m_solution[otherTeam][r];
-
-            //Search the round of the opposite game
-            int r2 = (c1 < 0) ? m_inRound[t][-(c1 + 1)] : m_inRound[c1 - 1][t];
+            int &c1 = m_solution[t1][r1];
+            int &cc1 = m_solution[t1][r2];
+            int &c2 = m_solution[t2][r1];
+            int &cc2 = m_solution[t2][r2];
 
             //Move
-            int& cc1 = m_solution[t][r2];
-            int& cc2 = m_solution[otherTeam][r2];
-            c1 = -c1;
-            c2 = -c2;
-            cc1 = -cc1;
-            cc2 = -cc2;
+            std::swap(c1, cc1);
+            std::swap(c2, cc2);
 
             //Check solution
             std::vector<std::pair<int, int>> cells;
-            cells.push_back(std::make_pair(t, r));
-            cells.push_back(std::make_pair(t, r2));
-            cells.push_back(std::make_pair(otherTeam, r));
-            cells.push_back(std::make_pair(otherTeam, r2));
+            cells.push_back(std::make_pair(t1, r1));
+            cells.push_back(std::make_pair(t1, r2));
+            cells.push_back(std::make_pair(t2, r1));
+            cells.push_back(std::make_pair(t2, r2));
 
             if (checkSolution(solution, distance, cells))
                 improved = true;
 
             //Undo move
-            c1 = -c1;
-            c2 = -c2;
-            cc1 = -cc1;
-            cc2 = -cc2;
+            std::swap(c1, cc1);
+            std::swap(c2, cc2);
 
             if (improved && !m_findBestImprovement)
                 return true;
-
-            //delete already considered homes
-            cpy[t][r] = 0;
-            cpy[otherTeam][r] = 0;
-            cpy[t][r2] = 0;
-            cpy[otherTeam][r2] = 0;
         }
     }
     return improved;
