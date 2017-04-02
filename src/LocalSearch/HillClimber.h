@@ -28,6 +28,9 @@ private:
     bool m_findBestImprovement;
     mat2i m_solution;
     mat2i m_distance;
+    //inRund[0][1] = 2 means team 0 plays at home against team 1 in round 2
+    //-1 means no such game exists in the current plan. Needed for some neighborhoods
+    mat2i m_inRound;
     std::vector<swapFunc> m_neighborhoods;
 
     //Neighborhoods:
@@ -41,6 +44,7 @@ private:
     bool swapPartialTeams(mat2i& solution, int& distance);
     //Check constraints and set solution to new solution if it is better
     bool checkSolution(mat2i& solution, int& distance, const std::vector<std::pair<int, int>>& cells);
+    void calcInRound();
 };
 
 #endif /* SRC_LOCALSEARCH_HILLCLIMBER_H_ */

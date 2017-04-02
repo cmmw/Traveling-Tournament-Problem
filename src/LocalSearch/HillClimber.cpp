@@ -12,13 +12,14 @@
 #include <iostream>
 
 HillClimber::HillClimber(const mat2i& solution, const mat2i& distance) :
-        m_teams(solution.size()), m_rounds(m_teams * 2 - 2), m_findBestImprovement(false), m_solution(solution), m_distance(distance)
+        m_teams(solution.size()), m_rounds(m_teams * 2 - 2), m_findBestImprovement(false), m_solution(solution), m_distance(distance), m_inRound(m_teams, std::vector<int>(m_teams, -1))
 {
     m_neighborhoods.push_back(&HillClimber::swapHomes);
     m_neighborhoods.push_back(&HillClimber::swapRounds);
     m_neighborhoods.push_back(&HillClimber::swapTeams);
     m_neighborhoods.push_back(&HillClimber::swapPartialRounds);
     m_neighborhoods.push_back(&HillClimber::swapPartialTeams);
+    calcInRound();
 }
 
 HillClimber::~HillClimber()
@@ -42,26 +43,16 @@ mat2i HillClimber::solve()
         }
         std::cout << distance << std::endl;
         if (run)
+        {
             m_solution = solution;
+            calcInRound();
+        }
     }
     return m_solution;
 }
 
 bool HillClimber::swapHomes(mat2i& solution, int& distance)
 {
-    //inRund[0][1] = 2 means team 0 plays at home against team 1 in round 2
-    //-1 means no such game exists in the current plan
-    mat2i inRound(m_teams, std::vector<int>(m_teams, -1));
-    for (int t = 0; t < m_teams; t++)
-    {
-        for (int r = 0; r < m_rounds; r++)
-        {
-            int o = m_solution[t][r];
-            if (o > 0)
-                inRound[t][o - 1] = r;
-        }
-    }
-
     bool improved = false;
     mat2i cpy = m_solution;
     for (int t = 0; t < m_teams; t++)
@@ -76,7 +67,7 @@ bool HillClimber::swapHomes(mat2i& solution, int& distance)
             int& c2 = m_solution[otherTeam][r];
 
             //Search the round of the opposite game
-            int r2 = (c1 < 0) ? inRound[t][-(c1 + 1)] : inRound[c1 - 1][t];
+            int r2 = (c1 < 0) ? m_inRound[t][-(c1 + 1)] : m_inRound[c1 - 1][t];
 
             //Move
             int& cc1 = m_solution[t][r2];
@@ -259,19 +250,6 @@ bool HillClimber::swapPartialRounds(mat2i& solution, int& distance)
 
 bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
 {
-    //inRund[0][1] = 2 means team 0 plays at home against team 1 in round 2
-    //-1 means no such game exists in the current plan
-    mat2i inRound(m_teams, std::vector<int>(m_teams, -1));
-    for (int t = 0; t < m_teams; t++)
-    {
-        for (int r = 0; r < m_rounds; r++)
-        {
-            int o = m_solution[t][r];
-            if (o > 0)
-                inRound[t][o - 1] = r;
-        }
-    }
-
     bool improved = false;
     for (int t1 = 0; t1 < m_teams - 1; t1++)
     {
@@ -291,9 +269,9 @@ bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
                     int t = m_solution[t2][rr];
                     //In which round plays tt1 against t
                     if (t < 0)
-                        rr = inRound[-(t + 1)][t1];
+                        rr = m_inRound[-(t + 1)][t1];
                     else
-                        rr = inRound[t1][t - 1];
+                        rr = m_inRound[t1][t - 1];
                     if (rr < 0)
                     {
                         std::cout << t1 << ", " << t2 << ", " << r << std::endl;
@@ -361,4 +339,17 @@ bool HillClimber::checkSolution(mat2i& solution, int& distance, const std::vecto
         return true;
     }
     return false;
+}
+
+void HillClimber::calcInRound()
+{
+    for (int t = 0; t < m_teams; t++)
+    {
+        for (int r = 0; r < m_rounds; r++)
+        {
+            int o = m_solution[t][r];
+            if (o > 0)
+                m_inRound[t][o - 1] = r;
+        }
+    }
 }
