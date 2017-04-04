@@ -20,14 +20,26 @@ public:
 
 private:
 
-    typedef bool (HillClimber::*swapFunc)(mat2i& solution, int& distance);
+    typedef bool (HillClimber::*swapFunc)();
+    typedef std::vector<std::pair<int, int>> entries;
 
     int m_teams;
     int m_rounds;
     //Hill climber parameters
     bool m_findBestImprovement;
+
+    //Temporary solution object which is used to calculate neighbor
     mat2i m_solution;
     mat2i m_distance;
+
+    //Best solution so far
+    mat2i m_incumbentSolution;
+    int m_incumbentDistance;
+
+    //Base solution for the current iteration
+    mat2i m_baseSolution;
+    int m_baseDistance;
+
     //inRund[0][1] = 2 means team 0 plays at home against team 1 in round 2
     //-1 means no such game exists in the current plan. Needed for some neighborhoods
     mat2i m_inRound;
@@ -37,14 +49,20 @@ private:
     // solution - output parameter, if true is returned, this value will be set to the found solution, otherwise it is not changed
     // distance - input/output parameter, input is the value of the current best solution, output the value of the found solution if return value is true
     // returns true if a better solution was found
-    bool swapHomes(mat2i& solution, int& distance);
-    bool swapRounds(mat2i& solution, int& distance);
-    bool swapTeams(mat2i& solution, int& distance);
-    bool swapPartialRounds(mat2i& solution, int& distance);
-    bool swapPartialTeams(mat2i& solution, int& distance);
+    bool swapHomes();
+    entries moveHomes(int t1, int t2);
+    bool swapRounds();
+    entries moveRounds(int r1, int r2);
+    bool swapTeams();
+    entries moveTeams(int t1, int t2);
+    bool swapPartialRounds();
+    entries movePartialRounds(int r1, int r2, int t);
+    bool swapPartialTeams();
+    entries movePartialTeams(int t1, int t2, int r);
     //Check constraints and set solution to new solution if it is better
-    bool checkSolution(mat2i& solution, int& distance, const std::vector<std::pair<int, int>>& cells);
+    bool checkSolution(const std::vector<std::pair<int, int>>& cells);
     void calcInRound();
+    void undoMoves(const entries& cells);
 };
 
 #endif /* SRC_LOCALSEARCH_HILLCLIMBER_H_ */

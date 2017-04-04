@@ -19,6 +19,11 @@ HillClimber::HillClimber(const mat2i& solution, const mat2i& distance) :
     m_neighborhoods.push_back(&HillClimber::swapTeams);
     m_neighborhoods.push_back(&HillClimber::swapPartialRounds);
     m_neighborhoods.push_back(&HillClimber::swapPartialTeams);
+
+    m_baseSolution = m_solution;
+    m_incumbentSolution = m_solution;
+    m_incumbentDistance = Common::eval(m_incumbentSolution, m_distance);
+    m_baseDistance = m_incumbentDistance;
     calcInRound();
 }
 
@@ -28,8 +33,6 @@ HillClimber::~HillClimber()
 
 mat2i HillClimber::solve()
 {
-    int distance = Common::eval(m_solution, m_distance);
-    mat2i solution;
     bool run = true;
     while (run)
     {
@@ -37,52 +40,37 @@ mat2i HillClimber::solve()
         //For all neighborhoods
         for (swapFunc f : m_neighborhoods)
         {
-            run = (this->*f)(solution, distance) || run;
+            run = (this->*f)() || run;
             if (!m_findBestImprovement && run)
                 break;
         }
-        std::cout << distance << std::endl;
+        std::cout << m_incumbentDistance << std::endl;
         if (run)
         {
-            m_solution = solution;
+            m_solution = m_incumbentSolution;
+            m_baseSolution = m_incumbentSolution;
             calcInRound();
         }
     }
     return m_solution;
 }
 
-bool HillClimber::swapHomes(mat2i& solution, int& distance)
+bool HillClimber::swapHomes()
 {
     bool improved = false;
     for (int t1 = 0; t1 < m_teams - 1; t1++)
     {
         for (int t2 = t1 + 1; t2 < m_teams; t2++)
         {
-            int r1 = m_inRound[t1][t2];
-            int r2 = m_inRound[t2][t1];
-
-            int &c1 = m_solution[t1][r1];
-            int &cc1 = m_solution[t1][r2];
-            int &c2 = m_solution[t2][r1];
-            int &cc2 = m_solution[t2][r2];
-
             //Move
-            std::swap(c1, cc1);
-            std::swap(c2, cc2);
+            std::vector<std::pair<int, int>> cells = moveHomes(t1, t2);
 
             //Check solution
-            std::vector<std::pair<int, int>> cells;
-            cells.push_back(std::make_pair(t1, r1));
-            cells.push_back(std::make_pair(t1, r2));
-            cells.push_back(std::make_pair(t2, r1));
-            cells.push_back(std::make_pair(t2, r2));
-
-            if (checkSolution(solution, distance, cells))
+            if (checkSolution(cells))
                 improved = true;
 
             //Undo move
-            std::swap(c1, cc1);
-            std::swap(c2, cc2);
+            undoMoves(cells);
 
             if (improved && !m_findBestImprovement)
                 return true;
@@ -91,82 +79,83 @@ bool HillClimber::swapHomes(mat2i& solution, int& distance)
     return improved;
 }
 
-bool HillClimber::swapRounds(mat2i& solution, int& distance)
+HillClimber::entries HillClimber::moveHomes(int t1, int t2)
+{
+    int r1 = m_inRound[t1][t2];
+    int r2 = m_inRound[t2][t1];
+    int &c1 = m_solution[t1][r1];
+    int &cc1 = m_solution[t1][r2];
+    int &c2 = m_solution[t2][r1];
+    int &cc2 = m_solution[t2][r2];
+
+    //Move
+    std::swap(c1, cc1);
+    std::swap(c2, cc2);
+
+    //Return changed cells
+    entries cells;
+    cells.push_back(std::make_pair(t1, r1));
+    cells.push_back(std::make_pair(t1, r2));
+    cells.push_back(std::make_pair(t2, r1));
+    cells.push_back(std::make_pair(t2, r2));
+
+    return cells;
+}
+
+bool HillClimber::swapRounds()
 {
     bool improved = false;
     for (int r1 = 0; r1 < m_rounds - 1; r1++)
     {
         for (int r2 = r1 + 1; r2 < m_rounds; r2++)
         {
-            //Swap teams
-            std::vector<std::pair<int, int>> cells;
-            for (int t = 0; t < m_teams; t++)
-            {
-                int& c1 = m_solution[t][r1];
-                int& c2 = m_solution[t][r2];
-                std::swap(c1, c2);
-                cells.push_back(std::make_pair(t, r1));
-                cells.push_back(std::make_pair(t, r2));
-            }
+            //Move
+            entries cells = moveRounds(r1, r2);
 
-            if (checkSolution(solution, distance, cells))
+            if (checkSolution(cells))
                 improved = true;
 
             //Undo move
-            for (int t = 0; t < m_teams; t++)
-                std::swap(m_solution[t][r1], m_solution[t][r2]);
+            undoMoves(cells);
 
             if (improved && !m_findBestImprovement)
                 return true;
-
         }
     }
     return improved;
 }
 
-bool HillClimber::swapTeams(mat2i& solution, int& distance)
+HillClimber::entries HillClimber::moveRounds(int r1, int r2)
+{
+    entries cells;
+    for (int t = 0; t < m_teams; t++)
+    {
+        int& c1 = m_solution[t][r1];
+        int& c2 = m_solution[t][r2];
+        std::swap(c1, c2);
+        cells.push_back(std::make_pair(t, r1));
+        cells.push_back(std::make_pair(t, r2));
+    }
+    return cells;
+}
+
+bool HillClimber::swapTeams()
 {
     bool improved = false;
     for (int t1 = 0; t1 < m_teams - 1; t1++)
     {
         for (int t2 = t1 + 1; t2 < m_teams; t2++)
         {
-            //Swap teams
-            std::vector<std::pair<int, int>> cells;
-            for (int r = 0; r < m_rounds; r++)
-            {
-                int& c1 = m_solution[t1][r];
-                int& c2 = m_solution[t2][r];
-                int tt1 = std::abs(c1) - 1;
-                int tt2 = std::abs(c2) - 1;
-                int& cc1 = m_solution[tt1][r];
-                int& cc2 = m_solution[tt2][r];
-                std::swap(c1, c2);
-                std::swap(cc1, cc2);
-                Common::swapSigns(cc1, cc2);
-                cells.push_back(std::make_pair(t1, r));
-                cells.push_back(std::make_pair(t2, r));
-                cells.push_back(std::make_pair(tt1, r));
-                cells.push_back(std::make_pair(tt2, r));
-            }
+            //Move
+            entries cells = moveTeams(t1, t2);
 
             //Check if swaps caused violations of the constraints
-            if (checkSolution(solution, distance, cells))
+            if (checkSolution(cells))
                 improved = true;
 
             //Undo move
-            for (int r = 0; r < m_rounds; r++)
-            {
-                int& c1 = m_solution[t1][r];
-                int& c2 = m_solution[t2][r];
-                int tt1 = std::abs(c1) - 1;
-                int tt2 = std::abs(c2) - 1;
-                int& cc1 = m_solution[tt1][r];
-                int& cc2 = m_solution[tt2][r];
-                std::swap(c1, c2);
-                std::swap(cc1, cc2);
-                Common::swapSigns(cc1, cc2);
-            }
+            undoMoves(cells);
+
             if (improved && !m_findBestImprovement)
                 return true;
         }
@@ -174,7 +163,29 @@ bool HillClimber::swapTeams(mat2i& solution, int& distance)
     return improved;
 }
 
-bool HillClimber::swapPartialRounds(mat2i& solution, int& distance)
+HillClimber::entries HillClimber::moveTeams(int t1, int t2)
+{
+    entries cells;
+    for (int r = 0; r < m_rounds; r++)
+    {
+        int& c1 = m_solution[t1][r];
+        int& c2 = m_solution[t2][r];
+        int tt1 = std::abs(c1) - 1;
+        int tt2 = std::abs(c2) - 1;
+        int& cc1 = m_solution[tt1][r];
+        int& cc2 = m_solution[tt2][r];
+        std::swap(c1, c2);
+        std::swap(cc1, cc2);
+        Common::swapSigns(cc1, cc2);
+        cells.push_back(std::make_pair(t1, r));
+        cells.push_back(std::make_pair(t2, r));
+        cells.push_back(std::make_pair(tt1, r));
+        cells.push_back(std::make_pair(tt2, r));
+    }
+    return cells;
+}
+
+bool HillClimber::swapPartialRounds()
 {
     bool improved = false;
     for (int r1 = 0; r1 < m_rounds - 1; r1++)
@@ -183,47 +194,17 @@ bool HillClimber::swapPartialRounds(mat2i& solution, int& distance)
         {
             for (int t = 0; t < m_teams; t++)
             {
-                int rr1 = r1;
-                int rr2 = r2;
-                std::vector<int> teamsToSwap;
-                teamsToSwap.push_back(t);
-                int tt = std::abs(m_solution[t][r1]) - 1;
-                teamsToSwap.push_back(tt);
-
-                while (true)
-                {
-                    tt = m_solution[tt][rr2];
-                    tt = std::abs(tt) - 1;
-
-                    if (std::find(teamsToSwap.begin(), teamsToSwap.end(), tt) != teamsToSwap.end())
-                        break;
-
-                    teamsToSwap.push_back(tt);
-                    std::swap(rr1, rr2);
-                }
                 //TODO: don't test teams in teamsToSwap again (use a list instead of going though all teams and remove the ones in teamsToSwap)
+                entries cells = movePartialRounds(r1, r2, t);
 
-                //If all teams have to be swapped, skip (already done in swapRounds)
-                if ((int) teamsToSwap.size() == m_teams)
-                    break;
+                if (cells.empty())
+                    continue;
 
-                //Swap teams
-                std::vector<std::pair<int, int>> cells;
-                for (int t0 : teamsToSwap)
-                {
-                    std::swap(m_solution[t0][r1], m_solution[t0][r2]);
-                    cells.push_back(std::make_pair(t0, r1));
-                    cells.push_back(std::make_pair(t0, r2));
-                }
-
-                if (checkSolution(solution, distance, cells))
+                if (checkSolution(cells))
                     improved = true;
 
                 //Undo move
-                for (int t0 : teamsToSwap)
-                {
-                    std::swap(m_solution[t0][r1], m_solution[t0][r2]);
-                }
+                undoMoves(cells);
 
                 if (improved && !m_findBestImprovement)
                     return true;
@@ -233,7 +214,43 @@ bool HillClimber::swapPartialRounds(mat2i& solution, int& distance)
     return improved;
 }
 
-bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
+HillClimber::entries HillClimber::movePartialRounds(int r1, int r2, int t)
+{
+    int rr1 = r1;
+    int rr2 = r2;
+    std::vector<int> teamsToSwap;
+    teamsToSwap.push_back(t);
+    int tt = std::abs(m_solution[t][r1]) - 1;
+    teamsToSwap.push_back(tt);
+
+    while (true)
+    {
+        tt = m_solution[tt][rr2];
+        tt = std::abs(tt) - 1;
+
+        if (std::find(teamsToSwap.begin(), teamsToSwap.end(), tt) != teamsToSwap.end())
+            break;
+
+        teamsToSwap.push_back(tt);
+        std::swap(rr1, rr2);
+    }
+
+    //If all teams have to be swapped, skip (already done in swapRounds)
+    if ((int) teamsToSwap.size() == m_teams)
+        return entries();
+
+    //Swap teams
+    entries cells;
+    for (int t0 : teamsToSwap)
+    {
+        std::swap(m_solution[t0][r1], m_solution[t0][r2]);
+        cells.push_back(std::make_pair(t0, r1));
+        cells.push_back(std::make_pair(t0, r2));
+    }
+    return cells;
+}
+
+bool HillClimber::swapPartialTeams()
 {
     bool improved = false;
     for (int t1 = 0; t1 < m_teams - 1; t1++)
@@ -243,59 +260,17 @@ bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
             for (int r = 0; r < m_rounds; r++)
             {
                 //TODO skip all rounds that were already considered after each loop
-                //If t1 plays against t2
-                if (std::abs(m_solution[t1][r]) - 1 == t2)
-                    continue;
-                int rr = r;
-                std::vector<int> roundsToSwap;
-                roundsToSwap.push_back(r);
-                while (true)
-                {
-                    int t = m_solution[t2][rr];
-                    //In which round plays tt1 against t
-                    if (t < 0)
-                        rr = m_inRound[-(t + 1)][t1];
-                    else
-                        rr = m_inRound[t1][t - 1];
-                    if (rr < 0)
-                    {
-                        std::cout << t1 << ", " << t2 << ", " << r << std::endl;
-                    }
-                    if (std::find(roundsToSwap.begin(), roundsToSwap.end(), rr) != roundsToSwap.end())
-                        break;
-                    roundsToSwap.push_back(rr);
-                }
+                entries cells = movePartialTeams(t1, t2, r);
 
-                if ((int) roundsToSwap.size() == m_rounds)
+                if (cells.empty())
                     continue;
 
-                //Swap teams
-                std::vector<std::pair<int, int>> cells;
-                for (auto r0 : roundsToSwap)
-                {
-                    int tt1 = std::abs(m_solution[t1][r0]) - 1;
-                    int tt2 = std::abs(m_solution[t2][r0]) - 1;
-                    std::swap(m_solution[t1][r0], m_solution[t2][r0]);
-                    std::swap(m_solution[tt1][r0], m_solution[tt2][r0]);
-                    Common::swapSigns(m_solution[tt1][r0], m_solution[tt2][r0]);
-                    cells.push_back(std::make_pair(t1, r0));
-                    cells.push_back(std::make_pair(t2, r0));
-                    cells.push_back(std::make_pair(tt1, r0));
-                    cells.push_back(std::make_pair(tt2, r0));
-                }
-
-                if (checkSolution(solution, distance, cells))
+                if (checkSolution(cells))
                     improved = true;
 
                 //Undo move
-                for (auto r0 : roundsToSwap)
-                {
-                    int tt1 = std::abs(m_solution[t1][r0]) - 1;
-                    int tt2 = std::abs(m_solution[t2][r0]) - 1;
-                    std::swap(m_solution[t1][r0], m_solution[t2][r0]);
-                    std::swap(m_solution[tt1][r0], m_solution[tt2][r0]);
-                    Common::swapSigns(m_solution[tt1][r0], m_solution[tt2][r0]);
-                }
+                undoMoves(cells);
+
                 if (improved && !m_findBestImprovement)
                     return true;
             }
@@ -304,7 +279,53 @@ bool HillClimber::swapPartialTeams(mat2i& solution, int& distance)
     return improved;
 }
 
-bool HillClimber::checkSolution(mat2i& solution, int& distance, const std::vector<std::pair<int, int>>& cells)
+HillClimber::entries HillClimber::movePartialTeams(int t1, int t2, int r)
+{
+    //If t1 plays against t2
+    if (std::abs(m_solution[t1][r]) - 1 == t2)
+        return entries();
+
+    int rr = r;
+    std::vector<int> roundsToSwap;
+    roundsToSwap.push_back(r);
+    while (true)
+    {
+        int t = m_solution[t2][rr];
+        //In which round plays tt1 against t
+        if (t < 0)
+            rr = m_inRound[-(t + 1)][t1];
+        else
+            rr = m_inRound[t1][t - 1];
+        if (rr < 0)
+        {
+            std::cout << t1 << ", " << t2 << ", " << r << std::endl;
+        }
+        if (std::find(roundsToSwap.begin(), roundsToSwap.end(), rr) != roundsToSwap.end())
+            break;
+        roundsToSwap.push_back(rr);
+    }
+
+    if ((int) roundsToSwap.size() == m_rounds)
+        return entries();
+
+    //Swap teams
+    std::vector<std::pair<int, int>> cells;
+    for (auto r0 : roundsToSwap)
+    {
+        int tt1 = std::abs(m_solution[t1][r0]) - 1;
+        int tt2 = std::abs(m_solution[t2][r0]) - 1;
+        std::swap(m_solution[t1][r0], m_solution[t2][r0]);
+        std::swap(m_solution[tt1][r0], m_solution[tt2][r0]);
+        Common::swapSigns(m_solution[tt1][r0], m_solution[tt2][r0]);
+        cells.push_back(std::make_pair(t1, r0));
+        cells.push_back(std::make_pair(t2, r0));
+        cells.push_back(std::make_pair(tt1, r0));
+        cells.push_back(std::make_pair(tt2, r0));
+    }
+    return cells;
+}
+
+bool HillClimber::checkSolution(const std::vector<std::pair<int, int>>& cells)
 {
     //Check constraints
     for (std::pair<int, int> p : cells)
@@ -317,10 +338,10 @@ bool HillClimber::checkSolution(mat2i& solution, int& distance, const std::vecto
 
     //Check if solution is better
     int distTmp = Common::eval(m_solution, m_distance);
-    if (distTmp < distance)
+    if (distTmp < m_incumbentDistance)
     {
-        distance = distTmp;
-        solution = m_solution;
+        m_incumbentDistance = distTmp;
+        m_incumbentSolution = m_solution;
         return true;
     }
     return false;
@@ -332,9 +353,17 @@ void HillClimber::calcInRound()
     {
         for (int r = 0; r < m_rounds; r++)
         {
-            int o = m_solution[t][r];
+            int o = m_baseSolution[t][r];
             if (o > 0)
                 m_inRound[t][o - 1] = r;
         }
+    }
+}
+
+void HillClimber::undoMoves(const entries& cells)
+{
+    for (const auto& c : cells)
+    {
+        m_solution[c.first][c.second] = m_baseSolution[c.first][c.second];
     }
 }
