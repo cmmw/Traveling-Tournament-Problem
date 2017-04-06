@@ -328,7 +328,7 @@ HillClimber::entries HillClimber::movePartialTeams(int t1, int t2, int r)
 bool HillClimber::checkSolution(const std::vector<std::pair<int, int>>& cells)
 {
     //Check constraints
-    for (std::pair<int, int> p : cells)
+    for (const auto& p : cells)
     {
         int t = p.first;
         int r = p.second;
