@@ -27,10 +27,11 @@ private:
     int m_rounds;
     //Hill climber parameters
     bool m_findBestImprovement;
+    mat2i m_distance;
 
     //Temporary solution object which is used to calculate neighbor
     mat2i m_solution;
-    mat2i m_distance;
+    int m_solutionDistance;
 
     //Best solution so far
     mat2i m_incumbentSolution;
@@ -63,6 +64,8 @@ private:
     bool checkSolution(const std::vector<std::pair<int, int>>& cells);
     void calcInRound();
     void undoMoves(const entries& cells);
+    inline void swap(const int t1, const int r1, const int t2, const int r2);
+    inline void swapWithoutSigns(const int t1, const int r1, const int t2, const int r2);
 };
 
 #endif /* SRC_LOCALSEARCH_HILLCLIMBER_H_ */

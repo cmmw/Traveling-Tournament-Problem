@@ -10,9 +10,10 @@
 #include <algorithm>
 #include <set>
 #include <iostream>
+#include <cassert>
 
 HillClimber::HillClimber(const mat2i& solution, const mat2i& distance) :
-        m_teams(solution.size()), m_rounds(m_teams * 2 - 2), m_findBestImprovement(false), m_solution(solution), m_distance(distance), m_inRound(m_teams, std::vector<int>(m_teams, -1))
+        m_teams(solution.size()), m_rounds(m_teams * 2 - 2), m_findBestImprovement(false), m_distance(distance), m_inRound(m_teams, std::vector<int>(m_teams, -1))
 {
     m_neighborhoods.push_back(&HillClimber::swapHomes);
     m_neighborhoods.push_back(&HillClimber::swapRounds);
@@ -20,10 +21,12 @@ HillClimber::HillClimber(const mat2i& solution, const mat2i& distance) :
     m_neighborhoods.push_back(&HillClimber::swapPartialRounds);
     m_neighborhoods.push_back(&HillClimber::swapPartialTeams);
 
+    m_solution = solution;
     m_baseSolution = m_solution;
     m_incumbentSolution = m_solution;
     m_incumbentDistance = Common::eval(m_incumbentSolution, m_distance);
     m_baseDistance = m_incumbentDistance;
+    m_solutionDistance = m_baseDistance;
     calcInRound();
 }
 
@@ -48,7 +51,9 @@ mat2i HillClimber::solve()
         if (run)
         {
             m_solution = m_incumbentSolution;
+            m_solutionDistance = m_incumbentDistance;
             m_baseSolution = m_incumbentSolution;
+            m_baseDistance = m_incumbentDistance;
             calcInRound();
         }
     }
@@ -83,14 +88,10 @@ HillClimber::entries HillClimber::moveHomes(int t1, int t2)
 {
     int r1 = m_inRound[t1][t2];
     int r2 = m_inRound[t2][t1];
-    int &c1 = m_solution[t1][r1];
-    int &cc1 = m_solution[t1][r2];
-    int &c2 = m_solution[t2][r1];
-    int &cc2 = m_solution[t2][r2];
 
     //Move
-    std::swap(c1, cc1);
-    std::swap(c2, cc2);
+    swap(t1, r1, t1, r2);
+    swap(t2, r1, t2, r2);
 
     //Return changed cells
     entries cells;
@@ -130,9 +131,7 @@ HillClimber::entries HillClimber::moveRounds(int r1, int r2)
     entries cells;
     for (int t = 0; t < m_teams; t++)
     {
-        int& c1 = m_solution[t][r1];
-        int& c2 = m_solution[t][r2];
-        std::swap(c1, c2);
+        swap(t, r1, t, r2);
         cells.push_back(std::make_pair(t, r1));
         cells.push_back(std::make_pair(t, r2));
     }
@@ -172,11 +171,9 @@ HillClimber::entries HillClimber::moveTeams(int t1, int t2)
         int& c2 = m_solution[t2][r];
         int tt1 = std::abs(c1) - 1;
         int tt2 = std::abs(c2) - 1;
-        int& cc1 = m_solution[tt1][r];
-        int& cc2 = m_solution[tt2][r];
-        std::swap(c1, c2);
-        std::swap(cc1, cc2);
-        Common::swapSigns(cc1, cc2);
+        swap(t1, r, t2, r);
+        swapWithoutSigns(tt1, r, tt2, r);
+
         cells.push_back(std::make_pair(t1, r));
         cells.push_back(std::make_pair(t2, r));
         cells.push_back(std::make_pair(tt1, r));
@@ -243,7 +240,7 @@ HillClimber::entries HillClimber::movePartialRounds(int r1, int r2, int t)
     entries cells;
     for (int t0 : teamsToSwap)
     {
-        std::swap(m_solution[t0][r1], m_solution[t0][r2]);
+        swap(t0, r1, t0, r2);
         cells.push_back(std::make_pair(t0, r1));
         cells.push_back(std::make_pair(t0, r2));
     }
@@ -296,10 +293,7 @@ HillClimber::entries HillClimber::movePartialTeams(int t1, int t2, int r)
             rr = m_inRound[-(t + 1)][t1];
         else
             rr = m_inRound[t1][t - 1];
-        if (rr < 0)
-        {
-            std::cout << t1 << ", " << t2 << ", " << r << std::endl;
-        }
+        assert(rr >= 0);
         if (std::find(roundsToSwap.begin(), roundsToSwap.end(), rr) != roundsToSwap.end())
             break;
         roundsToSwap.push_back(rr);
@@ -314,9 +308,8 @@ HillClimber::entries HillClimber::movePartialTeams(int t1, int t2, int r)
     {
         int tt1 = std::abs(m_solution[t1][r0]) - 1;
         int tt2 = std::abs(m_solution[t2][r0]) - 1;
-        std::swap(m_solution[t1][r0], m_solution[t2][r0]);
-        std::swap(m_solution[tt1][r0], m_solution[tt2][r0]);
-        Common::swapSigns(m_solution[tt1][r0], m_solution[tt2][r0]);
+        swap(t1, r0, t2, r0);
+        swapWithoutSigns(tt1, r0, tt2, r0);
         cells.push_back(std::make_pair(t1, r0));
         cells.push_back(std::make_pair(t2, r0));
         cells.push_back(std::make_pair(tt1, r0));
@@ -337,10 +330,10 @@ bool HillClimber::checkSolution(const std::vector<std::pair<int, int>>& cells)
     }
 
     //Check if solution is better
-    int distTmp = Common::eval(m_solution, m_distance);
-    if (distTmp < m_incumbentDistance)
+//    assert(Common::eval(m_solution, m_distance) == m_solutionDistance);
+    if (m_solutionDistance < m_incumbentDistance)
     {
-        m_incumbentDistance = distTmp;
+        m_incumbentDistance = m_solutionDistance;
         m_incumbentSolution = m_solution;
         return true;
     }
@@ -366,4 +359,41 @@ void HillClimber::undoMoves(const entries& cells)
     {
         m_solution[c.first][c.second] = m_baseSolution[c.first][c.second];
     }
+    m_solutionDistance = m_baseDistance;
+}
+
+void HillClimber::swap(const int t1, const int r1, const int t2, const int r2)
+{
+    int tmp = m_solution[t1][r1];
+    int dtDist = 0;
+    dtDist -= Common::deltaDistance(t1, r1, m_solution, m_distance);
+    m_solution[t1][r1] = m_solution[t2][r2];
+    dtDist += Common::deltaDistance(t1, r1, m_solution, m_distance);
+
+    dtDist -= Common::deltaDistance(t2, r2, m_solution, m_distance);
+    m_solution[t2][r2] = tmp;
+    dtDist += Common::deltaDistance(t2, r2, m_solution, m_distance);
+    m_solutionDistance += dtDist;
+}
+
+void HillClimber::swapWithoutSigns(const int t1, const int r1, const int t2, const int r2)
+{
+    int& c1 = m_solution[t1][r1];
+    int& c2 = m_solution[t2][r2];
+    bool sameSign = std::signbit(c1) == std::signbit(c2);
+    int tmp = c1;
+    int dtDist = 0;
+
+    dtDist -= Common::deltaDistance(t1, r1, m_solution, m_distance);
+    c1 = c2;
+    if (!sameSign)
+        c1 = -c1;
+    dtDist += Common::deltaDistance(t1, r1, m_solution, m_distance);
+
+    dtDist -= Common::deltaDistance(t2, r2, m_solution, m_distance);
+    c2 = tmp;
+    if (!sameSign)
+        c2 = -c2;
+    dtDist += Common::deltaDistance(t2, r2, m_solution, m_distance);
+    m_solutionDistance += dtDist;
 }

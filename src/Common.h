@@ -33,7 +33,6 @@ public:
     static int atMost(int team, int round, const mat2i& solution);
     //Returns false if there is a repeating game
     static int noRepeat(int team, int round, const mat2i& solution);
-    static void swapSigns(int& c1, int& c2);
 };
 
 #endif /* COMMON_H_ */

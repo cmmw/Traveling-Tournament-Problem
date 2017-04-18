@@ -248,14 +248,3 @@ int Common::noRepeat(int team, int round, const mat2i& solution)
     return true;
 }
 
-void Common::swapSigns(int& c1, int& c2)
-{
-    bool s1 = std::signbit(c1);
-    bool s2 = std::signbit(c2);
-
-    if (s1 == s2)
-        return;
-
-    c1 = -c1;
-    c2 = -c2;
-}
