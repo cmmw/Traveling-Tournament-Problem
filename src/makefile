@@ -1,6 +1,10 @@
 
-LIBDIR=-L/home/christian/lib/cplex-12.7.0/lib/x86-64_linux/static_pic -L/home/christian/lib/cplex-12.7.0/concert/lib/x86-64_linux/static_pic
-INCDIR=-I/home/christian/lib/cplex-12.7.0/concert/include/ -I/home/christian/lib/cplex-12.7.0/include/
+ifeq ($(CPLEXDIR),)
+CPLEXDIR=/home/christian/lib/cplex-12.7.0/
+endif
+
+LIBDIR=-L$(CPLEXDIR)/cplex/lib/x86-64_linux/static_pic -L$(CPLEXDIR)/concert/lib/x86-64_linux/static_pic
+INCDIR=-I$(CPLEXDIR)/concert/include/ -I$(CPLEXDIR)/cplex/include/
 
 CCFLAGS=-O3 -pedantic -Wall -std=c++11 -DIL_STD $(INCDIR)
 LDFLAGS=$(LIBDIR)
