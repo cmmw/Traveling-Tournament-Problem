@@ -11,6 +11,8 @@
 extern const char* P_INSTANCE;
 extern int P_IP_TIMEOUT;
 extern int P_IP_THREADS;
+extern int P_DESTROY_LB;
+extern int P_DESTROY_UB;
 
 void printParams();
 void readParams(int argc, char* argv[]);

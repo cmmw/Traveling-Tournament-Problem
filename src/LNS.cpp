@@ -14,13 +14,14 @@
 #include "destroy/DestroyHomeAwayPattern.h"
 #include "destroy/DestroyVenues.h"
 #include "LocalSearch/HillClimber.h"
+#include "Params.h"
 #include <cstdlib>
 #include <algorithm>
 #include <iostream>
 #include <typeindex>
 
 LNS::LNS(const mat2i& distance) :
-        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance), m_destroyLb(20), m_destroyUb(55), m_solver(distance)
+        m_teams(distance.size()), m_rounds(m_teams * 2 - 2), m_distance(distance), m_destroyLb(P_DESTROY_LB), m_destroyUb(P_DESTROY_UB), m_solver(distance)
 {
     m_destroyMethods.push_back(new DestroyColumns(m_distance, m_solver));
     m_destroyMethods.push_back(new DestroyRows(m_distance, m_solver));
