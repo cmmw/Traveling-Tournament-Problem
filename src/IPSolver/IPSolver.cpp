@@ -6,7 +6,7 @@
  */
 
 #include "../IPSolver/IPSolver.h"
-
+#include "../Params.h"
 #include <sstream>
 
 IPSolver::IPSolver(const mat2i& distance) :
@@ -262,8 +262,8 @@ void IPSolver::setParams()
     m_cplex.setParam(IloCplex::MIPInterval, 1000);
     m_cplex.setParam(IloCplex::MIPDisplay, 0);
     m_cplex.setWarning(m_cplex.getEnv().getNullStream());
-    m_cplex.setParam(IloCplex::Threads, 8);
-    m_cplex.setParam(IloCplex::TiLim, 10);
+    m_cplex.setParam(IloCplex::Threads, P_IP_THREADS);
+    m_cplex.setParam(IloCplex::TiLim, P_IP_TIMEOUT);
 }
 
 mat2i IPSolver::convert()
