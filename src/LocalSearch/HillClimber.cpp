@@ -164,9 +164,13 @@ bool HillClimber::swapTeams()
 
 HillClimber::entries HillClimber::moveTeams(int t1, int t2)
 {
+    int r1 = m_inRound[t1][t2];
+    int r2 = m_inRound[t2][t1];
     entries cells;
     for (int r = 0; r < m_rounds; r++)
     {
+        if (r == r1 || r == r2)
+            continue;
         int& c1 = m_solution[t1][r];
         int& c2 = m_solution[t2][r];
         int tt1 = std::abs(c1) - 1;
